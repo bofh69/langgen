@@ -16,10 +16,10 @@ Strings like this:
 \The(me) give\s(me) \a(env) to \the(obj).
 ```
 is used to generate messages like:
-The old postman gives a stamp to Gandalf the gray.
-You give a stamp to Gandalf the gray.
-The small goblin gives a stamp to someone.
-Someone gives a stamp to Gandalf the gray.
+* The old postman gives a stamp to Gandalf the gray.
+* You give a stamp to Gandalf the gray.
+* The small goblin gives a stamp to someone.
+* Someone gives a stamp to Gandalf the gray.
 
 ## Concepts
 There are a few concepts involved.
@@ -33,7 +33,7 @@ A named object is an object with four names and some flags;
 The names can be nouns and proper names.
 
 ### Viewers
-A viewer can answer questions such as if it can see another viewer.
+A viewer can answer questions such as if it can see an Actor.
 
 ### Actors
 An Actor is a Named Object and also a Viewer.
@@ -43,15 +43,12 @@ A template text is a string like this:
 ```
 \The(me) give\s(me) \a(env) to \the(obj).
 ```
-
-"me", "env" and "obj" are refering to Actors.
-"\The", "\s" and "\a" (among others) are directives
-
-As can be infered, the text can contain directives that references
-named objects.
+"me", "env" and "obj" are refering to actors.
+"\The", "\s" and "\a" (among others) are codes that are transformed into
+proper English for the refered actors.
 
 ### Output Handlers
-An output handler is a Viewer and it also has methods to send
+An output handler is a Viewer and it has methods to send
 the generated texts to the users.
 
 ### Templates
@@ -77,6 +74,7 @@ is used to generate the texts to the user.
   * "orc, old orc"  
   * "louce, blue louce, lice, blue lice"
 * A configurable system can create irregular plural names from singular names:
+  * "\*f" -> "\*ves" (ie elf becomes elves).
   * "\*fe" -> "\*ves" (ie knife becomes knives).
   * "\*man" -> "\*men" (ie woman, women).
 * There is a macro system to make it easy to add styling:
@@ -112,21 +110,20 @@ CODE     DESCRIPTION         RESULT                                      NO_THE
 \style(style) Adds style. It is up to the output system to make sense of it.
 
 
-\num(num) number from num    42
+\num(num)  number from num   42
 \snum(num) string from num   nine
-\str(text) string from text  prints text as a string
+\str(text) string from text  A string
 
 
 CODE             MALE    FEMALE  NEUTER  PLURAL      YOU         SOMETHING   SOMEONE
 ====             ====    ======  ======  ======      ===         =========   =======
 \he()            he      she     it      they        you         it          he
 \He()            He      She     It      They        You         It          He
-\he_s()          he's.   she's.  it's.   they're.    you're.     it's.       he's
-\He_s()          He's.   She's.  It's.   They're.    You're.     It's.       He's
-\his()           his.    her.    its.    their.      your.       its.        his
+\he_s()          he's    she's   it's    they're     you're      it's        he's
+\He_s()          He's    She's   It's    They're     You're      It's        He's
+\his()           his     her     its     their       your        its         his
 \hiss()          his     hers    its     theirs      yours       its         his
 \him()           him     her     it      them        you         it          him
 \himself()       himself herself itself  themselves  yourself    itself      himself
-
 
 ```
