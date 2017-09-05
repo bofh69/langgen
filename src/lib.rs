@@ -228,6 +228,35 @@ impl Named for NamedImpl {
     // Gandalf, Gandalf the gray, %man, %gray
 }
 
+/// An Output that just throws away the text.
+pub struct NullOutput {}
+
+impl Output for NullOutput {
+    /// Does nothing.
+    fn write_text(&mut self, _: &str) {}
+    /// Does nothing.
+    fn write_style(&mut self, _: &str) {}
+    /// Does nothing.
+    fn done(&mut self) {}
+}
+
+impl Viewer for NullOutput {
+    /// Always returns false.
+    fn can_see(&self, _: &Actor) -> bool {
+        false
+    }
+
+    /// Always returns false.
+    fn can(&self, _: &str, _: &Actor) -> bool {
+        false
+    }
+
+    /// Always returns false.
+    fn has(&self, _: &str) -> bool {
+        false
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
