@@ -7,7 +7,9 @@ struct DebugActor {
 
 impl DebugActor {
     fn new(name: String) -> DebugActor {
-        DebugActor { named: NamedFactory::create(name) }
+        let mut buff = std::io::Cursor::new("man:men\n");
+        let nf = NamedFactory::new(&mut buff);
+        DebugActor { named: nf.create(name) }
     }
 }
 
