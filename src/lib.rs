@@ -59,6 +59,8 @@ pub trait Template {
 
 // -------------------------------------------
 
+pub struct NamedFactory {}
+
 struct NamedImpl {
     names: Vec<String>,
     short_proper_name: bool,
@@ -67,8 +69,8 @@ struct NamedImpl {
     long_proper_plural_name: bool,
 }
 
-impl NamedImpl {
-    fn new(name: String) -> NamedImpl {
+impl NamedFactory {
+    pub fn create(name: String) -> Box<Named> {
         let mut names: Vec<String> = name.split(",")
             .map(|s| String::from(s.trim_left()))
             .collect();
@@ -109,13 +111,13 @@ impl NamedImpl {
         } else {
             false
         };
-        NamedImpl {
+        Box::new(NamedImpl {
             names: names,
             short_proper_name: short_proper_name,
             long_proper_name: long_proper_name,
             short_proper_plural_name: short_proper_plural_name,
             long_proper_plural_name: long_proper_plural_name,
-        }
+        }) as Box<Named>
     }
 }
 
@@ -162,144 +164,23 @@ impl Named for NamedImpl {
 
 #[cfg(test)]
 mod tests {
-    use ::*;
-
-    struct DebugOutput {
-        text: String,
-        last_text: String,
-    }
-
-    impl ::Viewer for DebugOutput {
-        fn can_see(&self, _who: &Actor) -> bool {
-            true
-        }
-
-        // Ie the viewer can "hear" Actor.
-        fn can(&self, _verb: &str, _who: &Actor) -> bool {
-            true
-        }
-
-        // Ie The viewer has the see_curse property?
-        fn has(&self, _property: &str) -> bool {
-            true
-        }
-    }
-
-    impl Output for DebugOutput {
-        fn write_text(&mut self, text: &str) {
-            self.text += text;
-        }
-
-        fn write_style(&mut self, style: &str) {
-            self.text += "<";
-            self.text += style;
-            self.text += ">";
-        }
-
-        fn done(&mut self) {
-            self.last_text.clear();
-            self.last_text += &self.text;
-            self.text.clear();
-        }
-    }
-
-    impl DebugOutput {
-        fn new() -> DebugOutput {
-            DebugOutput {
-                text: String::new(),
-                last_text: String::new(),
-            }
-        }
-    }
-
-    struct DebugActor {
-        named: NamedImpl,
-    }
-
-    impl DebugActor {
-        fn new(name: String) -> DebugActor {
-            DebugActor { named: NamedImpl::new(name) }
-        }
-    }
-
-    impl Viewer for DebugActor {
-        fn can_see(&self, _who: &Actor) -> bool {
-            true
-        }
-
-        fn can(&self, _verb: &str, _who: &Actor) -> bool {
-            true
-        }
-
-        fn has(&self, _property: &str) -> bool {
-            true
-        }
-    }
-
-    impl Named for DebugActor {
-        fn gender(&self) -> Gender {
-            self.named.gender()
-        }
-
-        fn is_short_proper(&self) -> bool {
-            self.named.is_short_proper()
-        }
-
-        fn short_name(&self) -> &str {
-            self.named.short_name()
-        }
-
-        fn is_long_proper(&self) -> bool {
-            self.named.is_long_proper()
-        }
-
-        fn long_name(&self) -> &str {
-            self.named.long_name()
-        }
-
-        fn is_short_plural_proper(&self) -> bool {
-            self.named.is_short_plural_proper()
-        }
-
-        fn short_plural_name(&self) -> &str {
-            self.named.short_plural_name()
-        }
-
-        fn is_long_plural_proper(&self) -> bool {
-            self.named.is_long_plural_proper()
-        }
-
-        fn long_plural_name(&self) -> &str {
-            self.named.long_plural_name()
-        }
-    }
+    use super::*;
 
     #[test]
     fn short_name() {
-        let ove = DebugActor::new(String::from("!Ove, !Ove Svensson"));
+        let ove = NamedFactory::create(String::from("!Ove, !Ove Svensson"));
         assert_eq!(ove.short_name(), "Ove");
 
-        let eva = DebugActor::new(String::from("Eva, Eva Stinasson"));
+        let eva = NamedFactory::create(String::from("Eva, Eva Stinasson"));
         assert_eq!(eva.short_name(), "Eva");
     }
 
     #[test]
     fn long_name() {
-        let ove = DebugActor::new(String::from("Ove, Ove Svensson"));
+        let ove = NamedFactory::create(String::from("Ove, Ove Svensson"));
         assert_eq!(ove.long_name(), "Ove Svensson");
 
-        let eva = DebugActor::new(String::from("Eva, Eva Stinasson"));
+        let eva = NamedFactory::create(String::from("Eva, Eva Stinasson"));
         assert_eq!(eva.long_name(), "Eva Stinasson");
-    }
-
-    #[test]
-    fn test_debug_output() {
-        let mut out = DebugOutput::new();
-        out.write_style("bold");
-        out.write_text("test");
-        out.write_style("/bold");
-        out.done();
-        assert_eq!(out.last_text, "<bold>test</bold>");
-        assert_eq!(out.text, "");
     }
 }
