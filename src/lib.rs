@@ -81,7 +81,7 @@ pub trait Template {
 
 /// Creates object implementing Named.
 pub struct NamedFactory {
-    pluralizing_prefixes: std::collections::BTreeMap<String, String>,
+    pluralizing_prefixes: Vec<(String, String)>,
 }
 
 struct NamedImpl {
@@ -103,7 +103,7 @@ impl NamedFactory {
             }
         }
 
-        let mut map: std::collections::BTreeMap<String, String> = std::collections::BTreeMap::new();
+        let mut map: Vec<(String, String)> = vec![];
         let mut nr = 0;
         let mut line = String::new();
         while let Ok(len) = buff.read_line(&mut line) {
@@ -119,12 +119,38 @@ impl NamedFactory {
                            nr,
                            s);
                 }
-                map.insert(String::from(s[0].trim()), String::from(s[1].trim()));
+                map.push((String::from(s[0].trim()), String::from(s[1].trim())));
             }
             line.clear();
         }
 
         NamedFactory { pluralizing_prefixes: map }
+    }
+
+    fn pluralize(&self, name : &String) -> String {
+        // 1. Search the map for translations.
+        for ref entry in self.pluralizing_prefixes.iter() {
+            let k = &entry.0;
+            let v = &entry.1;
+            if name.ends_with(k.as_str()) {
+                if let Some(s) = name.get(0..(name.len() - k.len())) {
+                    let mut ret = String::new();
+                    ret.push_str(s);
+                    ret.push_str(v.as_str());
+                    return ret;
+                }
+            }
+        }
+        // 2. If it ends with s, add "es"
+        // 3. Add "s"
+        let mut ret = String::new();
+        ret.push_str(name);
+        if name.ends_with("s") {
+            ret.push('e');
+        } else {
+        }
+        ret.push('s');
+        ret
     }
 
     pub fn create(&self, name: String) -> Box<Named> {
@@ -150,8 +176,7 @@ impl NamedFactory {
         };
         if names.len() < 3 {
             let long_name = names[0].clone();
-            // TODO: Pluralise it.
-            names.push(long_name);
+            names.push(self.pluralize(&long_name));
         }
         if long_proper_name {
             names[1].remove(0);
@@ -163,8 +188,7 @@ impl NamedFactory {
         };
         if names.len() < 4 {
             let long_name = names[1].clone();
-            // TODO: Pluralise it.
-            names.push(long_name);
+            names.push(self.pluralize(&long_name));
         }
         if short_proper_plural_name {
             names[2].remove(0);
@@ -261,10 +285,14 @@ impl Viewer for NullOutput {
 mod tests {
     use super::*;
 
+    fn get_named_fac() -> NamedFactory {
+        let mut pluralizer = std::io::Cursor::new("man:men\nfe:ves\n");
+        NamedFactory::new(&mut pluralizer)
+    }
+
     #[test]
     fn short_name() {
-        let mut pluralizer = std::io::Cursor::new("man:men\nve:fes\n");
-        let nf = NamedFactory::new(&mut pluralizer);
+        let nf = get_named_fac();
         let ove = nf.create(String::from("!Ove, !Ove Svensson"));
         assert_eq!(ove.short_name(), "Ove");
 
@@ -273,13 +301,44 @@ mod tests {
     }
 
     #[test]
+    fn short_plural() {
+        let nf = get_named_fac();
+        let man = nf.create(String::from("man, old man, mob, angry mob"));
+        assert_eq!(man.short_plural_name(), "mob");
+
+        let orc = nf.create(String::from("orc, blue orc"));
+        assert_eq!(orc.short_plural_name(), "orcs");
+
+        let kiss = nf.create(String::from("kiss"));
+        assert_eq!(kiss.short_plural_name(), "kisses");
+
+        let knife = nf.create(String::from("knife, dull knife"));
+        assert_eq!(knife.short_plural_name(), "knives");
+    }
+
+    #[test]
     fn long_name() {
-        let mut pluralizer = std::io::Cursor::new("man:men\nve:fes\n");
-        let nf = NamedFactory::new(&mut pluralizer);
+        let nf = get_named_fac();
         let ove = nf.create(String::from("!Ove, !Ove Svensson"));
         assert_eq!(ove.long_name(), "Ove Svensson");
 
         let eva = nf.create(String::from("Eva, Eva Stinasson"));
         assert_eq!(eva.long_name(), "Eva Stinasson");
+    }
+
+    #[test]
+    fn long_plural() {
+        let nf = get_named_fac();
+        let man = nf.create(String::from("man, old man, mob, angry mob"));
+        assert_eq!(man.long_plural_name(), "angry mob");
+
+        let orc = nf.create(String::from("orc, blue orc"));
+        assert_eq!(orc.long_plural_name(), "blue orcs");
+
+        let kiss = nf.create(String::from("kiss"));
+        assert_eq!(kiss.long_plural_name(), "kisses");
+
+        let knife = nf.create(String::from("knife, dull knife"));
+        assert_eq!(knife.long_plural_name(), "dull knives");
     }
 }
