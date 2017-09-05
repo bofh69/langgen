@@ -1,4 +1,4 @@
-# langgen
+# langgen [![Build Status](https://travis-ci.org/bofh69/langgen.svg?branch=master)](https://travis-ci.org/bofh69/langgen)
 A crate to generate natural language from templates.
 
 ## Intro
