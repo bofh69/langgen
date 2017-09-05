@@ -94,7 +94,7 @@ struct NamedImpl {
 
 impl NamedFactory {
     pub fn new(buff: &mut std::io::BufRead) -> NamedFactory {
-        fn is_comment(line: &String) -> bool {
+        fn is_comment(line: &str) -> bool {
             let line = line.trim();
             if let Some(c) = line.chars().next() {
                 c == '#'
@@ -107,12 +107,12 @@ impl NamedFactory {
         let mut nr = 0;
         let mut line = String::new();
         while let Ok(len) = buff.read_line(&mut line) {
-            if len <= 0 {
+            if len == 0 {
                 break;
             }
             nr += 1;
-            if line.trim().len() > 0 && !is_comment(&line) {
-                let s = line.split(':').map(|s| String::from(s)).collect::<Vec<String>>();
+            if !line.trim().is_empty() && !is_comment(&line) {
+                let s = line.split(':').map(String::from).collect::<Vec<String>>();
                 if s.len() != 2 {
                     panic!("Pluralized mapping has the wrong format on line {}, should be \
                             from:to: {:?}",
@@ -127,9 +127,9 @@ impl NamedFactory {
         NamedFactory { pluralizing_prefixes: map }
     }
 
-    fn pluralize(&self, name : &String) -> String {
+    fn pluralize(&self, name: &str) -> String {
         // 1. Search the map for translations.
-        for ref entry in self.pluralizing_prefixes.iter() {
+        for entry in &self.pluralizing_prefixes {
             let k = &entry.0;
             let v = &entry.1;
             if name.ends_with(k.as_str()) {
@@ -145,7 +145,7 @@ impl NamedFactory {
         // 3. Add "s"
         let mut ret = String::new();
         ret.push_str(name);
-        if name.ends_with("s") {
+        if name.ends_with('s') {
             ret.push('e');
         } else {
         }
@@ -154,7 +154,7 @@ impl NamedFactory {
     }
 
     pub fn create(&self, name: String) -> Box<Named> {
-        let mut names: Vec<String> = name.split(",")
+        let mut names: Vec<String> = name.split(',')
             .map(|s| String::from(s.trim_left()))
             .collect();
         if names.len() < 2 {
