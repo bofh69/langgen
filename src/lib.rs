@@ -1,3 +1,5 @@
+mod suffix;
+
 /// The gender of Actor:s.
 pub enum Gender {
     Male,
@@ -81,7 +83,7 @@ pub trait Template {
 
 /// Creates object implementing Named.
 pub struct NamedFactory {
-    pluralizing_prefixes: Vec<(String, String)>,
+    pluralising_suffixes: suffix::Suffix<String>,
 }
 
 struct NamedImpl {
@@ -124,18 +126,16 @@ impl NamedFactory {
             line.clear();
         }
 
-        NamedFactory { pluralizing_prefixes: map }
+        NamedFactory { pluralising_suffixes: suffix::Suffix::new(map) }
     }
 
     fn pluralize(&self, name: &str) -> String {
         // 1. Search the map for translations.
-        for entry in &self.pluralizing_prefixes {
-            let k = &entry.0;
-            let v = &entry.1;
-            if name.ends_with(k.as_str()) {
+        match self.pluralising_suffixes.lookup(name) {
+            None => (),
+            Some((k, v)) => {
                 if let Some(s) = name.get(0..(name.len() - k.len())) {
-                    let mut ret = String::new();
-                    ret.push_str(s);
+                    let mut ret = String::from(s);
                     ret.push_str(v.as_str());
                     return ret;
                 }
@@ -143,8 +143,7 @@ impl NamedFactory {
         }
         // 2. If it ends with s, add "es"
         // 3. Add "s"
-        let mut ret = String::new();
-        ret.push_str(name);
+        let mut ret = String::from(name);
         if name.ends_with('s') {
             ret.push('e');
         } else {
