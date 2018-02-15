@@ -51,6 +51,7 @@ pub trait Output: Viewer {
     fn write_text(&mut self, text: &str);
     fn write_style(&mut self, &str);
     fn done(&mut self);
+    fn out(&mut self) -> OutputBuilder;
 }
 
 /**
@@ -79,6 +80,53 @@ pub trait Context<'a> {
  */
 pub trait Template {
     fn render(&self, ctx: &Context, out: &Output);
+}
+
+fn the(o : &Named, s : &mut String) {
+    if !o.is_short_proper() {
+        s.push_str("the ");
+    }
+    s.push_str(o.short_name());
+}
+
+fn the_(o : &Named, s : &mut String) {
+    if !o.is_long_proper() {
+        s.push_str("the ");
+    }
+    s.push_str(o.long_name());
+}
+
+
+fn is_vowel(c : char) -> bool {
+    match c {
+        'a'|'e'|'i'|'o'|'u'|'y' => true,
+        _ => false,
+    }
+}
+
+fn a__(name : &str, is_prop : bool, s : &mut String) {
+    if !is_prop {
+        let mut should_be_an = false;
+        if let Some(c) = name.chars().next() {
+            if is_vowel(c) {
+                should_be_an = true;
+            }
+        }
+        if should_be_an {
+            s.push_str("an ");
+        } else {
+            s.push_str("a ");
+        }
+    }
+    s.push_str(name);
+}
+
+fn a(o : &Named, s : &mut String) {
+    a__(o.short_name(), o.is_short_proper(), s);
+}
+
+fn a_(o : &Named, s : &mut String) {
+    a__(o.long_name(), o.is_long_proper(), s);
 }
 
 /// Creates object implementing Named.
@@ -152,7 +200,7 @@ impl NamedFactory {
         ret
     }
 
-    pub fn create(&self, name: String) -> Box<Named> {
+    pub fn create(&self, name: &str) -> Box<Named> {
         let mut names: Vec<String> = name.split(',')
             .map(|s| String::from(s.trim_left()))
             .collect();
@@ -261,6 +309,9 @@ impl Output for NullOutput {
     fn write_style(&mut self, _: &str) {}
     /// Does nothing.
     fn done(&mut self) {}
+    fn out<'a>(&mut self) -> OutputBuilder {
+        OutputBuilder::new(self as &mut Output)
+    }
 }
 
 impl Viewer for NullOutput {
@@ -280,6 +331,58 @@ impl Viewer for NullOutput {
     }
 }
 
+pub struct OutputBuilder<'a>  {
+    o : &'a mut Output,
+    s : String,
+    cap_it : bool,
+}
+
+impl<'a> Drop for OutputBuilder<'a> {
+    fn drop(&mut self) {
+        self.o.done();
+    }
+}
+
+impl<'a> OutputBuilder<'a> {
+    pub fn new(o : &'a mut Output) -> OutputBuilder<'a> {
+        OutputBuilder {
+            o: o,
+            s: String::new(),
+            cap_it: true,
+        }
+    }
+
+    pub fn s(mut self, text : &str) -> Self {
+        self.o.write_text(text);
+        self.cap_it = false;
+        self
+    }
+
+    pub fn the(mut self, name : &Named) -> Self {
+        the(name, &mut self.s);
+        self.cap_it = false;
+        self
+    }
+
+    pub fn the_(mut self, name : &Named) -> Self {
+        the_(name, &mut self.s);
+        self.cap_it = false;
+        self
+    }
+
+    pub fn a(mut self, name : &Named) -> Self {
+        a(name, &mut self.s);
+        self.cap_it = false;
+        self
+    }
+
+    pub fn a_(mut self, name : &Named) -> Self {
+        a_(name, &mut self.s);
+        self.cap_it = false;
+        self
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -292,52 +395,111 @@ mod tests {
     #[test]
     fn short_name() {
         let nf = get_named_fac();
-        let ove = nf.create(String::from("!Ove, !Ove Svensson"));
+        let ove = nf.create("!Ove, !Ove Svensson");
         assert_eq!(ove.short_name(), "Ove");
 
-        let eva = nf.create(String::from("Eva, Eva Stinasson"));
+        let eva = nf.create("Eva, Eva Stinasson");
         assert_eq!(eva.short_name(), "Eva");
     }
 
     #[test]
     fn short_plural() {
         let nf = get_named_fac();
-        let man = nf.create(String::from("man, old man, mob, angry mob"));
+        let man = nf.create("man, old man, mob, angry mob");
         assert_eq!(man.short_plural_name(), "mob");
 
-        let orc = nf.create(String::from("orc, blue orc"));
+        let orc = nf.create("orc, blue orc");
         assert_eq!(orc.short_plural_name(), "orcs");
 
-        let kiss = nf.create(String::from("kiss"));
+        let kiss = nf.create("kiss");
         assert_eq!(kiss.short_plural_name(), "kisses");
 
-        let knife = nf.create(String::from("knife, dull knife"));
+        let knife = nf.create("knife, dull knife");
         assert_eq!(knife.short_plural_name(), "knives");
     }
 
     #[test]
     fn long_name() {
         let nf = get_named_fac();
-        let ove = nf.create(String::from("!Ove, !Ove Svensson"));
+        let ove = nf.create("!Ove, !Ove Svensson");
         assert_eq!(ove.long_name(), "Ove Svensson");
 
-        let eva = nf.create(String::from("Eva, Eva Stinasson"));
+        let eva = nf.create("Eva, Eva Stinasson");
         assert_eq!(eva.long_name(), "Eva Stinasson");
     }
 
     #[test]
     fn long_plural() {
         let nf = get_named_fac();
-        let man = nf.create(String::from("man, old man, mob, angry mob"));
+        let man = nf.create("man, old man, mob, angry mob");
         assert_eq!(man.long_plural_name(), "angry mob");
 
-        let orc = nf.create(String::from("orc, blue orc"));
+        let orc = nf.create("orc, blue orc");
         assert_eq!(orc.long_plural_name(), "blue orcs");
 
-        let kiss = nf.create(String::from("kiss"));
+        let kiss = nf.create("kiss");
         assert_eq!(kiss.long_plural_name(), "kisses");
 
-        let knife = nf.create(String::from("knife, dull knife"));
+        let knife = nf.create("knife, dull knife");
         assert_eq!(knife.long_plural_name(), "dull knives");
+    }
+
+    #[test]
+    fn test_the() {
+        let nf = get_named_fac();
+        let man = nf.create("man, old man, mob, angry mob");
+        let mut s : String = "".into();
+        the(&*man, &mut s);
+        assert_eq!(s, "the man");
+
+        let mut s : String = "".into();
+        let ove = nf.create("!Ove, !Ove Svensson");
+        the(&*ove, &mut s);
+        assert_eq!(s, "Ove");
+    }
+
+    #[test]
+    fn test_the_() {
+        let nf = get_named_fac();
+        let man = nf.create("man, old man, mob, angry mob");
+        let mut s : String = "".into();
+        the_(&*man, &mut s);
+        assert_eq!(s, "the old man");
+
+        let mut s : String = "".into();
+        let ove = nf.create("!Ove, !Ove Svensson");
+        the_(&*ove, &mut s);
+        assert_eq!(s, "Ove Svensson");
+    }
+
+    #[test]
+    fn test_a() {
+        let nf = get_named_fac();
+
+        let mut s : String = "".into();
+        let ove = nf.create("!Ove, !Ove Svensson");
+        a(&*ove, &mut s);
+        assert_eq!(s, "Ove");
+
+        let apple = nf.create("apple");
+        let mut s : String = "".into();
+        a(&*apple, &mut s);
+        assert_eq!(s, "an apple");
+
+        let man = nf.create("man, old man, mob, angry mob");
+        let mut s : String = "".into();
+        a(&*man, &mut s);
+        assert_eq!(s, "a man");
+    }
+
+    #[test]
+    fn test_is_vowel() {
+        for c in "bcdfghjklmnpqrstvwxz".chars() {
+            assert_eq!(is_vowel(c), false, "{}", c);
+        }
+
+        for c in "aeiou".chars() {
+            assert_eq!(is_vowel(c), true, "{}", c);
+        }
     }
 }
