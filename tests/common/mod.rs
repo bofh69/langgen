@@ -14,6 +14,8 @@ impl DebugActor {
     }
 }
 
+impl Actor for DebugActor {}
+
 impl Viewer for DebugActor {
     fn can_see(&self, _who: &Actor) -> bool {
         true
@@ -69,11 +71,12 @@ impl Named for DebugActor {
 pub struct DebugOutput {
     pub text: String,
     pub last_text: String,
+    pub can_see: bool,
 }
 
 impl ::Viewer for DebugOutput {
     fn can_see(&self, _who: &Actor) -> bool {
-        true
+        self.can_see
     }
 
     // Ie the viewer can "hear" Actor.
@@ -114,6 +117,7 @@ impl DebugOutput {
         DebugOutput {
             text: String::new(),
             last_text: String::new(),
+            can_see: true,
         }
     }
 }

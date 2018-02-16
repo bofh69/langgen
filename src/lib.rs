@@ -82,14 +82,15 @@ pub trait Template {
     fn render(&self, ctx: &Context, out: &Output);
 }
 
-fn the(o : &Named, s : &mut String) {
+// TODO: These functions should probably write to an Output instead.
+fn the(o : &Actor, s : &mut String) {
     if !o.is_short_proper() {
         s.push_str("the ");
     }
     s.push_str(o.short_name());
 }
 
-fn the_(o : &Named, s : &mut String) {
+fn the_(o : &Actor, s : &mut String) {
     if !o.is_long_proper() {
         s.push_str("the ");
     }
@@ -121,11 +122,11 @@ fn a__(name : &str, is_prop : bool, s : &mut String) {
     s.push_str(name);
 }
 
-fn a(o : &Named, s : &mut String) {
+fn a(o : &Actor, s : &mut String) {
     a__(o.short_name(), o.is_short_proper(), s);
 }
 
-fn a_(o : &Named, s : &mut String) {
+fn a_(o : &Actor, s : &mut String) {
     a__(o.long_name(), o.is_long_proper(), s);
 }
 
@@ -309,7 +310,8 @@ impl Output for NullOutput {
     fn write_style(&mut self, _: &str) {}
     /// Does nothing.
     fn done(&mut self) {}
-    fn out<'a>(&mut self) -> OutputBuilder {
+    /// Returns an OutputBuilder for self.
+    fn out(&mut self) -> OutputBuilder {
         OutputBuilder::new(self as &mut Output)
     }
 }
@@ -339,6 +341,7 @@ pub struct OutputBuilder<'a>  {
 
 impl<'a> Drop for OutputBuilder<'a> {
     fn drop(&mut self) {
+        self.o.write_text(&self.s);
         self.o.done();
     }
 }
@@ -353,33 +356,65 @@ impl<'a> OutputBuilder<'a> {
     }
 
     pub fn s(mut self, text : &str) -> Self {
-        self.o.write_text(text);
+        self.s.push_str(text);
         self.cap_it = false;
         self
     }
 
-    pub fn the(mut self, name : &Named) -> Self {
-        the(name, &mut self.s);
-        self.cap_it = false;
-        self
+    pub fn the(mut self, obj : &Actor) -> Self {
+        if self.o.can_see(obj) {
+            the(obj, &mut self.s);
+            self.cap_it = false;
+            self
+        } else {
+            if obj.is_short_proper() {
+                self.s("someone")
+            } else {
+                self.s("something")
+            }
+        }
     }
 
-    pub fn the_(mut self, name : &Named) -> Self {
-        the_(name, &mut self.s);
-        self.cap_it = false;
-        self
+    pub fn the_(mut self, obj : &Actor) -> Self {
+        if self.o.can_see(obj) {
+            the_(obj, &mut self.s);
+            self.cap_it = false;
+            self
+        } else {
+            if obj.is_long_proper() {
+                self.s("someone")
+            } else {
+                self.s("something")
+            }
+        }
     }
 
-    pub fn a(mut self, name : &Named) -> Self {
-        a(name, &mut self.s);
-        self.cap_it = false;
-        self
+    pub fn a(mut self, obj : &Actor) -> Self {
+        if self.o.can_see(obj) {
+            a(obj, &mut self.s);
+            self.cap_it = false;
+            self
+        } else {
+            if obj.is_long_proper() {
+                self.s("someone")
+            } else {
+                self.s("something")
+            }
+        }
     }
 
-    pub fn a_(mut self, name : &Named) -> Self {
-        a_(name, &mut self.s);
-        self.cap_it = false;
-        self
+    pub fn a_(mut self, obj : &Actor) -> Self {
+        if self.o.can_see(obj) {
+            a_(obj, &mut self.s);
+            self.cap_it = false;
+            self
+        } else {
+            if obj.is_long_proper() {
+                self.s("someone")
+            } else {
+                self.s("something")
+            }
+        }
     }
 }
 
@@ -387,10 +422,77 @@ impl<'a> OutputBuilder<'a> {
 mod tests {
     use super::*;
 
+    pub struct DebugActor {
+        named: Box<Named>,
+    }
+
+    impl DebugActor {
+        pub fn new(name: &str) -> DebugActor {
+            let mut buff = std::io::Cursor::new("man:men\n");
+            let nf = NamedFactory::new(&mut buff);
+            DebugActor { named: nf.create(name) }
+        }
+    }
+
+    impl Actor for DebugActor {}
+
+    impl Viewer for DebugActor {
+        fn can_see(&self, _who: &Actor) -> bool {
+            true
+        }
+
+        fn can(&self, _verb: &str, _who: &Actor) -> bool {
+            true
+        }
+
+        fn has(&self, _property: &str) -> bool {
+            true
+        }
+    }
+
+    impl Named for DebugActor {
+        fn gender(&self) -> Gender {
+            self.named.gender()
+        }
+
+        fn is_short_proper(&self) -> bool {
+            self.named.is_short_proper()
+        }
+
+        fn short_name(&self) -> &str {
+            self.named.short_name()
+        }
+
+        fn is_long_proper(&self) -> bool {
+            self.named.is_long_proper()
+        }
+
+        fn long_name(&self) -> &str {
+            self.named.long_name()
+        }
+
+        fn is_short_plural_proper(&self) -> bool {
+            self.named.is_short_plural_proper()
+        }
+
+        fn short_plural_name(&self) -> &str {
+            self.named.short_plural_name()
+        }
+
+        fn is_long_plural_proper(&self) -> bool {
+            self.named.is_long_plural_proper()
+        }
+
+        fn long_plural_name(&self) -> &str {
+            self.named.long_plural_name()
+        }
+    }
+
     fn get_named_fac() -> NamedFactory {
         let mut pluralizer = std::io::Cursor::new("man:men\nfe:ves\n");
         NamedFactory::new(&mut pluralizer)
     }
+
 
     #[test]
     fn short_name() {
@@ -446,49 +548,45 @@ mod tests {
 
     #[test]
     fn test_the() {
-        let nf = get_named_fac();
-        let man = nf.create("man, old man, mob, angry mob");
+        let man = DebugActor::new("man, old man, mob, angry mob");
         let mut s : String = "".into();
-        the(&*man, &mut s);
+        the(&man, &mut s);
         assert_eq!(s, "the man");
 
         let mut s : String = "".into();
-        let ove = nf.create("!Ove, !Ove Svensson");
-        the(&*ove, &mut s);
+        let ove = DebugActor::new("!Ove, !Ove Svensson");
+        the(&ove, &mut s);
         assert_eq!(s, "Ove");
     }
 
     #[test]
     fn test_the_() {
-        let nf = get_named_fac();
-        let man = nf.create("man, old man, mob, angry mob");
+        let man = DebugActor::new("man, old man, mob, angry mob");
         let mut s : String = "".into();
-        the_(&*man, &mut s);
+        the_(&man, &mut s);
         assert_eq!(s, "the old man");
 
         let mut s : String = "".into();
-        let ove = nf.create("!Ove, !Ove Svensson");
-        the_(&*ove, &mut s);
+        let ove = DebugActor::new("!Ove, !Ove Svensson");
+        the_(&ove, &mut s);
         assert_eq!(s, "Ove Svensson");
     }
 
     #[test]
     fn test_a() {
-        let nf = get_named_fac();
-
         let mut s : String = "".into();
-        let ove = nf.create("!Ove, !Ove Svensson");
-        a(&*ove, &mut s);
+        let ove = DebugActor::new("!Ove, !Ove Svensson");
+        a(&ove, &mut s);
         assert_eq!(s, "Ove");
 
-        let apple = nf.create("apple");
+        let apple = DebugActor::new("apple");
         let mut s : String = "".into();
-        a(&*apple, &mut s);
+        a(&apple, &mut s);
         assert_eq!(s, "an apple");
 
-        let man = nf.create("man, old man, mob, angry mob");
+        let man = DebugActor::new("man, old man, mob, angry mob");
         let mut s : String = "".into();
-        a(&*man, &mut s);
+        a(&man, &mut s);
         assert_eq!(s, "a man");
     }
 
