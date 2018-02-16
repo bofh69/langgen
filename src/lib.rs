@@ -369,12 +369,10 @@ impl<'a> OutputBuilder<'a> {
             the(obj, &mut self.s);
             self.cap_it = false;
             self
+        } else if obj.is_short_proper() {
+            self.s("someone")
         } else {
-            if obj.is_short_proper() {
-                self.s("someone")
-            } else {
-                self.s("something")
-            }
+            self.s("something")
         }
     }
 
@@ -383,12 +381,10 @@ impl<'a> OutputBuilder<'a> {
             the_(obj, &mut self.s);
             self.cap_it = false;
             self
+        } else if obj.is_long_proper() {
+            self.s("someone")
         } else {
-            if obj.is_long_proper() {
-                self.s("someone")
-            } else {
-                self.s("something")
-            }
+            self.s("something")
         }
     }
 
@@ -397,12 +393,10 @@ impl<'a> OutputBuilder<'a> {
             a(obj, &mut self.s);
             self.cap_it = false;
             self
+        } else if obj.is_long_proper() {
+            self.s("someone")
         } else {
-            if obj.is_long_proper() {
-                self.s("someone")
-            } else {
-                self.s("something")
-            }
+            self.s("something")
         }
     }
 
@@ -411,12 +405,10 @@ impl<'a> OutputBuilder<'a> {
             a_(obj, &mut self.s);
             self.cap_it = false;
             self
+        } else if obj.is_long_proper() {
+            self.s("someone")
         } else {
-            if obj.is_long_proper() {
-                self.s("someone")
-            } else {
-                self.s("something")
-            }
+            self.s("something")
         }
     }
 }
