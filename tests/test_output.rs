@@ -20,7 +20,7 @@ fn test_out() {
     let mut out = DebugOutput::new();
     let ove = DebugActor::new("!Ove, !Ove Svensson");
     let apple = DebugActor::new("apple, red apple");
-    
+
     out.out().the(&ove).s(" has ").a(&apple).s(".");
     assert_eq!(out.last_text, "Ove has an apple.");
     assert_eq!(out.text, "");

@@ -42,7 +42,6 @@ pub trait Viewer {
 /// An Actor is an object or Subject in templates.
 pub trait Actor: Named + Viewer {}
 
-
 /**
  * The Output trait is used for objects that templates
  * can be rendered to.
@@ -83,14 +82,14 @@ pub trait Template {
 }
 
 // TODO: These functions should probably write to an Output instead.
-fn the(o : &Actor, s : &mut String) {
+fn the(o: &Actor, s: &mut String) {
     if !o.is_short_proper() {
         s.push_str("the ");
     }
     s.push_str(o.short_name());
 }
 
-fn the_(o : &Actor, s : &mut String) {
+fn the_(o: &Actor, s: &mut String) {
     if !o.is_long_proper() {
         s.push_str("the ");
     }
@@ -98,15 +97,15 @@ fn the_(o : &Actor, s : &mut String) {
 }
 
 // Used to decide between a/an.
-fn is_vowel(c : char) -> bool {
+fn is_vowel(c: char) -> bool {
     match c {
-        'a'|'e'|'i'|'o'|'u' => true,
+        'a' | 'e' | 'i' | 'o' | 'u' => true,
         // y is usually not pronounced like a vowel.
         _ => false,
     }
 }
 
-fn a__(name : &str, is_prop : bool, s : &mut String) {
+fn a__(name: &str, is_prop: bool, s: &mut String) {
     if !is_prop {
         let mut should_be_an = false;
         if let Some(c) = name.chars().next() {
@@ -123,11 +122,11 @@ fn a__(name : &str, is_prop : bool, s : &mut String) {
     s.push_str(name);
 }
 
-fn a(o : &Actor, s : &mut String) {
+fn a(o: &Actor, s: &mut String) {
     a__(o.short_name(), o.is_short_proper(), s);
 }
 
-fn a_(o : &Actor, s : &mut String) {
+fn a_(o: &Actor, s: &mut String) {
     a__(o.long_name(), o.is_long_proper(), s);
 }
 
@@ -166,17 +165,20 @@ impl NamedFactory {
             if !line.trim().is_empty() && !is_comment(&line) {
                 let s = line.split(':').map(String::from).collect::<Vec<String>>();
                 if s.len() != 2 {
-                    panic!("Pluralized mapping has the wrong format on line {}, should be \
-                            from:to: {:?}",
-                           nr,
-                           s);
+                    panic!(
+                        "Pluralized mapping has the wrong format on line {}, should be \
+                         from:to: {:?}",
+                        nr, s
+                    );
                 }
                 map.push((String::from(s[0].trim()), String::from(s[1].trim())));
             }
             line.clear();
         }
 
-        NamedFactory { pluralising_suffixes: suffix::Suffix::new(map) }
+        NamedFactory {
+            pluralising_suffixes: suffix::Suffix::new(map),
+        }
     }
 
     fn pluralize(&self, name: &str) -> String {
@@ -334,10 +336,10 @@ impl Viewer for NullOutput {
     }
 }
 
-pub struct OutputBuilder<'a>  {
-    o : &'a mut Output,
-    s : String,
-    cap_it : bool,
+pub struct OutputBuilder<'a> {
+    o: &'a mut Output,
+    s: String,
+    cap_it: bool,
 }
 
 impl<'a> Drop for OutputBuilder<'a> {
@@ -348,7 +350,7 @@ impl<'a> Drop for OutputBuilder<'a> {
 }
 
 impl<'a> OutputBuilder<'a> {
-    pub fn new(o : &'a mut Output) -> OutputBuilder<'a> {
+    pub fn new(o: &'a mut Output) -> OutputBuilder<'a> {
         OutputBuilder {
             o: o,
             s: String::new(),
@@ -356,13 +358,13 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn s(mut self, text : &str) -> Self {
+    pub fn s(mut self, text: &str) -> Self {
         self.s.push_str(text);
         self.cap_it = false;
         self
     }
 
-    pub fn the(mut self, obj : &Actor) -> Self {
+    pub fn the(mut self, obj: &Actor) -> Self {
         if self.o.can_see(obj) {
             the(obj, &mut self.s);
             self.cap_it = false;
@@ -376,7 +378,7 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn the_(mut self, obj : &Actor) -> Self {
+    pub fn the_(mut self, obj: &Actor) -> Self {
         if self.o.can_see(obj) {
             the_(obj, &mut self.s);
             self.cap_it = false;
@@ -390,7 +392,7 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn a(mut self, obj : &Actor) -> Self {
+    pub fn a(mut self, obj: &Actor) -> Self {
         if self.o.can_see(obj) {
             a(obj, &mut self.s);
             self.cap_it = false;
@@ -404,7 +406,7 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn a_(mut self, obj : &Actor) -> Self {
+    pub fn a_(mut self, obj: &Actor) -> Self {
         if self.o.can_see(obj) {
             a_(obj, &mut self.s);
             self.cap_it = false;
@@ -431,7 +433,9 @@ mod tests {
         pub fn new(name: &str) -> DebugActor {
             let mut buff = std::io::Cursor::new("man:men\n");
             let nf = NamedFactory::new(&mut buff);
-            DebugActor { named: nf.create(name) }
+            DebugActor {
+                named: nf.create(name),
+            }
         }
     }
 
@@ -494,7 +498,6 @@ mod tests {
         NamedFactory::new(&mut pluralizer)
     }
 
-
     #[test]
     fn short_name() {
         let nf = get_named_fac();
@@ -550,11 +553,11 @@ mod tests {
     #[test]
     fn test_the() {
         let man = DebugActor::new("man, old man, mob, angry mob");
-        let mut s : String = "".into();
+        let mut s: String = "".into();
         the(&man, &mut s);
         assert_eq!(s, "the man");
 
-        let mut s : String = "".into();
+        let mut s: String = "".into();
         let ove = DebugActor::new("!Ove, !Ove Svensson");
         the(&ove, &mut s);
         assert_eq!(s, "Ove");
@@ -563,11 +566,11 @@ mod tests {
     #[test]
     fn test_the_() {
         let man = DebugActor::new("man, old man, mob, angry mob");
-        let mut s : String = "".into();
+        let mut s: String = "".into();
         the_(&man, &mut s);
         assert_eq!(s, "the old man");
 
-        let mut s : String = "".into();
+        let mut s: String = "".into();
         let ove = DebugActor::new("!Ove, !Ove Svensson");
         the_(&ove, &mut s);
         assert_eq!(s, "Ove Svensson");
@@ -575,18 +578,18 @@ mod tests {
 
     #[test]
     fn test_a() {
-        let mut s : String = "".into();
+        let mut s: String = "".into();
         let ove = DebugActor::new("!Ove, !Ove Svensson");
         a(&ove, &mut s);
         assert_eq!(s, "Ove");
 
         let apple = DebugActor::new("apple");
-        let mut s : String = "".into();
+        let mut s: String = "".into();
         a(&apple, &mut s);
         assert_eq!(s, "an apple");
 
         let man = DebugActor::new("man, old man, mob, angry mob");
-        let mut s : String = "".into();
+        let mut s: String = "".into();
         a(&man, &mut s);
         assert_eq!(s, "a man");
     }

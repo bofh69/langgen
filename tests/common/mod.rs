@@ -10,7 +10,9 @@ impl DebugActor {
     pub fn new(name: &str) -> DebugActor {
         let mut buff = std::io::Cursor::new("man:men\n");
         let nf = NamedFactory::new(&mut buff);
-        DebugActor { named: nf.create(name) }
+        DebugActor {
+            named: nf.create(name),
+        }
     }
 }
 
