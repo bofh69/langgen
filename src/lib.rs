@@ -97,10 +97,11 @@ fn the_(o : &Actor, s : &mut String) {
     s.push_str(o.long_name());
 }
 
-
+// Used to decide between a/an.
 fn is_vowel(c : char) -> bool {
     match c {
-        'a'|'e'|'i'|'o'|'u'|'y' => true,
+        'a'|'e'|'i'|'o'|'u' => true,
+        // y is usually not pronounced like a vowel.
         _ => false,
     }
 }
@@ -592,7 +593,7 @@ mod tests {
 
     #[test]
     fn test_is_vowel() {
-        for c in "bcdfghjklmnpqrstvwxz".chars() {
+        for c in "bcdfghjklmnpqrstvwxyz".chars() {
             assert_eq!(is_vowel(c), false, "{}", c);
         }
 
