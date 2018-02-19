@@ -38,3 +38,19 @@ fn test_out() {
     assert_eq!(out.last_text, "something has someone.");
     assert_eq!(out.text, "");
 }
+
+/*
+#[test]
+fn test_out_for_me() {
+    let mut out = DebugOutput::new();
+
+    out.out().the(&out).s(" win.");
+    assert_eq!(out.last_text, "You win.");
+    assert_eq!(out.text, "");
+
+    out.can_see = false;
+    out.out().the(&out).s(" rulez.");
+    assert_eq!(out.last_text, "You win.");
+    assert_eq!(out.text, "");
+}
+*/

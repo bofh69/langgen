@@ -76,6 +76,46 @@ pub struct DebugOutput {
     pub can_see: bool,
 }
 
+impl ::Actor for DebugOutput {}
+
+impl ::Named for DebugOutput {
+    fn gender(&self) -> Gender {
+        Gender::Female
+    }
+
+    fn is_short_proper(&self) -> bool {
+        true
+    }
+
+    fn short_name(&self) -> &str {
+        "Morgana"
+    }
+
+    fn is_long_proper(&self) -> bool {
+        true
+    }
+
+    fn long_name(&self) -> &str {
+        "Morgana the blue"
+    }
+
+    fn is_short_plural_proper(&self) -> bool {
+        false
+    }
+
+    fn short_plural_name(&self) -> &str {
+        "Morganas"
+    }
+
+    fn is_long_plural_proper(&self) -> bool {
+        true
+    }
+
+    fn long_plural_name(&self) -> &str {
+        "Blue Morganas"
+    }
+}
+
 impl ::Viewer for DebugOutput {
     fn can_see(&self, _who: &Actor) -> bool {
         self.can_see

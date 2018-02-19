@@ -82,14 +82,14 @@ pub trait Template {
 }
 
 // TODO: These functions should probably write to an Output instead.
-fn the(o: &Actor, s: &mut String) {
+fn the(o: &Named, s: &mut String) {
     if !o.is_short_proper() {
         s.push_str("the ");
     }
     s.push_str(o.short_name());
 }
 
-fn the_(o: &Actor, s: &mut String) {
+fn the_(o: &Named, s: &mut String) {
     if !o.is_long_proper() {
         s.push_str("the ");
     }
@@ -122,11 +122,11 @@ fn a__(name: &str, is_prop: bool, s: &mut String) {
     s.push_str(name);
 }
 
-fn a(o: &Actor, s: &mut String) {
+fn a(o: &Named, s: &mut String) {
     a__(o.short_name(), o.is_short_proper(), s);
 }
 
-fn a_(o: &Actor, s: &mut String) {
+fn a_(o: &Named, s: &mut String) {
     a__(o.long_name(), o.is_long_proper(), s);
 }
 
@@ -364,7 +364,10 @@ impl<'a> OutputBuilder<'a> {
         self
     }
 
-    pub fn the(mut self, obj: &Actor) -> Self {
+    pub fn the<T>(mut self, obj: &T) -> Self
+    where
+        T: Actor,
+    {
         if self.o.can_see(obj) {
             the(obj, &mut self.s);
             self.cap_it = false;
@@ -376,7 +379,10 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn the_(mut self, obj: &Actor) -> Self {
+    pub fn the_<T>(mut self, obj: &T) -> Self
+    where
+        T: Actor,
+    {
         if self.o.can_see(obj) {
             the_(obj, &mut self.s);
             self.cap_it = false;
@@ -388,7 +394,10 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn a(mut self, obj: &Actor) -> Self {
+    pub fn a<T>(mut self, obj: &T) -> Self
+    where
+        T: Actor,
+    {
         if self.o.can_see(obj) {
             a(obj, &mut self.s);
             self.cap_it = false;
@@ -400,7 +409,10 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn a_(mut self, obj: &Actor) -> Self {
+    pub fn a_<T>(mut self, obj: &T) -> Self
+    where
+        T: Actor,
+    {
         if self.o.can_see(obj) {
             a_(obj, &mut self.s);
             self.cap_it = false;
