@@ -17,10 +17,12 @@ fn test_debug_output() {
 }
 
 #[test]
-fn test_out() {
+fn test_out_a_and_the() {
     let mut out = DebugOutput::new();
     let ove = DebugObject::new("!Ove, !Ove Svensson");
     let apple = DebugObject::new("apple, red apple");
+    let mut water = DebugObject::new("water, cold water");
+    water.gender = Gender::Uncountable;
 
     out.out().the(&ove).s(" has ").a(&apple).s(".");
     assert_eq!(out.last_text, "Ove has an apple.");
@@ -28,6 +30,14 @@ fn test_out() {
 
     out.out().the_(&apple).s(" has ").a(&ove).s(".");
     assert_eq!(out.last_text, "the red apple has Ove.");
+    assert_eq!(out.text, "");
+
+    out.out().the(&water).s(" is cold.");
+    assert_eq!(out.last_text, "the water is cold.");
+    assert_eq!(out.text, "");
+
+    out.out().a(&water);
+    assert_eq!(out.last_text, "water");
     assert_eq!(out.text, "");
 
     out.can_see = false;
@@ -71,7 +81,6 @@ fn test_verb_endings() {
     assert_eq!(out.text, "");
 
     out.can_see = true;
-
 }
 
 #[test]
@@ -82,12 +91,12 @@ fn test_out_for_me() {
 
     out.me = true;
 
-    out.out().the(&ove).s(" win.");
-    assert_eq!(out.last_text, "you win.");
+    out.out().the(&ove).v_e(&ove, " win");
+    assert_eq!(out.last_text, "you win");
     assert_eq!(out.text, "");
 
     out.can_see = false;
-    out.out().the(&ove).s(" win.");
-    assert_eq!(out.last_text, "you win.");
+    out.out().the(&ove).v_e(&ove, " win");
+    assert_eq!(out.last_text, "you win");
     assert_eq!(out.text, "");
 }

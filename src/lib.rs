@@ -1,5 +1,10 @@
 mod suffix;
 
+/*
+ * TODO: Named::gender should perhaps be moved to Object
+ * TODO Aliases on Named & NamedFactory: Gandalf, Gandalf the gray, %man, %gray
+ */
+
 /// The gender of Named:s.
 #[derive(Copy, Clone)]
 pub enum Gender {
@@ -12,6 +17,7 @@ pub enum Gender {
 
 /// Names of objects.
 pub trait Named {
+    /// The gender of the Named.
     fn gender(&self) -> Gender;
 
     fn is_short_proper(&self) -> bool;
@@ -92,31 +98,6 @@ fn is_vowel(c: char) -> bool {
         // y is usually not pronounced like a vowel.
         _ => false,
     }
-}
-
-fn a__(name: &str, is_prop: bool, s: &mut String) {
-    if !is_prop {
-        let mut should_be_an = false;
-        if let Some(c) = name.chars().next() {
-            if is_vowel(c) {
-                should_be_an = true;
-            }
-        }
-        if should_be_an {
-            s.push_str("an ");
-        } else {
-            s.push_str("a ");
-        }
-    }
-    s.push_str(name);
-}
-
-fn a(o: &Named, s: &mut String) {
-    a__(o.short_name(), o.is_short_proper(), s);
-}
-
-fn a_(o: &Named, s: &mut String) {
-    a__(o.long_name(), o.is_long_proper(), s);
 }
 
 /// Creates object implementing Named.
@@ -287,9 +268,6 @@ impl Named for NamedImpl {
     fn long_plural_name(&self) -> &str {
         self.names[3].as_str()
     }
-
-    // TODO Aliases:
-    // Gandalf, Gandalf the gray, %man, %gray
 }
 
 /// An Output that just throws away the text.
@@ -352,10 +330,10 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    fn is_plural(gender: Gender) -> bool {
+    fn is_singular(gender: Gender) -> bool {
         match gender {
-            Gender::Plural => true,
-            _ => false,
+            Gender::Plural | Gender::Uncountable => false,
+            _ => true,
         }
     }
 
@@ -371,7 +349,7 @@ impl<'a> OutputBuilder<'a> {
     {
         self.s.push_str(text);
         self.cap_it = false;
-        if Self::is_plural(obj.gender()) && !self.o.is_me(obj) {
+        if Self::is_singular(obj.gender()) && !self.o.is_me(obj) {
             self.s.push('s');
         }
         self
@@ -403,16 +381,27 @@ impl<'a> OutputBuilder<'a> {
         self.the__(obj, obj.long_name(), obj.is_long_proper())
     }
 
-    pub fn a<T>(mut self, obj: &T) -> Self
+    fn a__<T>(mut self, obj: &T, name: &str, is_prop: bool) -> Self
     where
         T: Object,
     {
         if self.o.is_me(obj) {
             self.s("you")
         } else if self.o.can_see(obj) {
-            a(obj, &mut self.s);
-            self.cap_it = false;
-            self
+            if !is_prop && Self::is_singular(obj.gender()) {
+                let mut should_be_an = false;
+                if let Some(c) = name.chars().next() {
+                    if is_vowel(c) {
+                        should_be_an = true;
+                    }
+                }
+                self = if should_be_an {
+                    self.s("an ")
+                } else {
+                    self.s("a ")
+                }
+            }
+            self.s(name)
         } else if obj.is_long_proper() {
             self.s("someone")
         } else {
@@ -420,21 +409,12 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn a_<T>(mut self, obj: &T) -> Self
-    where
-        T: Object,
-    {
-        if self.o.is_me(obj) {
-            self.s("you")
-        } else if self.o.can_see(obj) {
-            a_(obj, &mut self.s);
-            self.cap_it = false;
-            self
-        } else if obj.is_long_proper() {
-            self.s("someone")
-        } else {
-            self.s("something")
-        }
+    pub fn a<T: Object>(self, obj: &T) -> Self {
+        self.a__(obj, obj.short_name(), obj.is_short_proper())
+    }
+
+    pub fn a_<T: Object>(self, obj: &T) -> Self {
+        self.a__(obj, obj.long_name(), obj.is_long_proper())
     }
 }
 
@@ -574,28 +554,12 @@ mod tests {
     }
 
     #[test]
-    fn test_a() {
-        let mut s: String = "".into();
-        let ove = DebugObject::new("!Ove, !Ove Svensson");
-        a(&ove, &mut s);
-        assert_eq!(s, "Ove");
-
-        let apple = DebugObject::new("apple");
-        let mut s: String = "".into();
-        a(&apple, &mut s);
-        assert_eq!(s, "an apple");
-
-        let man = DebugObject::new("man, old man, mob, angry mob");
-        let mut s: String = "".into();
-        a(&man, &mut s);
-        assert_eq!(s, "a man");
-    }
-
-    #[test]
-    fn test_is_plural() {
-        assert_eq!(OutputBuilder::is_plural(Gender::Plural), true);
-        assert_eq!(OutputBuilder::is_plural(Gender::Male), false);
-        assert_eq!(OutputBuilder::is_plural(Gender::Female), false);
+    fn test_is_singular() {
+        assert_eq!(OutputBuilder::is_singular(Gender::Plural), false);
+        assert_eq!(OutputBuilder::is_singular(Gender::Uncountable), false);
+        assert_eq!(OutputBuilder::is_singular(Gender::Male), true);
+        assert_eq!(OutputBuilder::is_singular(Gender::Female), true);
+        assert_eq!(OutputBuilder::is_singular(Gender::Neuter), true);
     }
 
     #[test]
