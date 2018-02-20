@@ -11,15 +11,24 @@ This crate was inspired by DUMII, a MUD originally written by Christer Holgersso
 
 
 ## Example
+
+This crate has both an API and a template system for generating strings.
+The API can be used like this:
+```
+output.out().the(me).v_e("give").\a_(obj).s("to").the_(env);
+```
+Traits are used to make this usable with existing code.
+
+
 Strings like this:
 ```
-\The(me) give\s(me) \a(env) to \the(obj).
+\The(me) give\s(me) \a(obj) to \the_(env).
 ```
 is used to generate messages like:
-* The old postman gives a stamp to Gandalf the gray.
-* You give a stamp to Gandalf the gray.
+* The elf gives a stamp to Gandalf the gray.
+* You give a stamp to the old elf.
 * The small goblin gives a stamp to someone.
-* Someone gives a stamp to Gandalf the gray.
+* Someone gives something to the green rabbits
 
 ## Concepts
 There are a few concepts involved.
@@ -33,10 +42,10 @@ A named object is an object with four names and some flags;
 The names can be nouns and proper names.
 
 ### Viewers
-A viewer can answer questions such as if it can see an Actor.
+A viewer can answer questions such as if it can see an Object.
 
-### Actors
-An Actor is a Named Object and also a Viewer.
+### Objects
+An Object is a Named Object and also a Viewer.
 
 ### Template Texts
 A template text is a string like this:
@@ -73,7 +82,7 @@ is used to generate the texts to the user.
   * "!Gandalf, !Gandalf the gray"
   * "orc, old orc"  
   * "louce, blue louce, lice, blue lice"
-* A configurable system can create irregular plural names from singular names:
+* Configurable rules to create irregular plural names from singular names:
   * "\*f" -> "\*ves" (ie elf becomes elves).
   * "\*fe" -> "\*ves" (ie knife becomes knives).
   * "\*man" -> "\*men" (ie woman, women).
