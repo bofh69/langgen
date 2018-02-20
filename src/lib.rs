@@ -1,6 +1,7 @@
 mod suffix;
 
-/// The gender of Actor:s.
+/// The gender of Named:s.
+#[derive(Copy, Clone)]
 pub enum Gender {
     Male,
     Female,
@@ -30,17 +31,20 @@ pub trait Named {
  */
 pub trait Viewer {
     /// Can this Viewer see who?
-    fn can_see(&self, who: &Actor) -> bool;
+    fn can_see(&self, who: &Object) -> bool;
 
     /// Can this Viewer "verb" who?
-    fn can(&self, verb: &str, who: &Actor) -> bool;
+    fn can(&self, verb: &str, who: &Object) -> bool;
 
     /// Does the Viewer have "property"?
     fn has(&self, property: &str) -> bool;
+
+    /// Is who this viewer?
+    fn is_me(&self, who: &Object) -> bool;
 }
 
-/// An Actor is an object or Subject in templates.
-pub trait Actor: Named + Viewer {}
+/// An Object is an object or Subject in templates.
+pub trait Object: Named {}
 
 /**
  * The Output trait is used for objects that templates
@@ -56,9 +60,9 @@ pub trait Output: Viewer {
 /**
  * Objects are used in templates for obj, env etc.
  */
-pub enum Object<'a> {
-    Act(&'a Actor),
-    // CountedAct(i64, &'a Actor),
+pub enum ObjectRef<'a> {
+    // Object(&'a Object),
+    // CountedObject(i64, &'a Object),
     Int(i64),
     String(&'a str),
 }
@@ -66,12 +70,12 @@ pub enum Object<'a> {
 /**
  * Context contains the objects referenced in templates.
  */
-pub trait Context<'a> {
-    fn get_me(&self) -> &Actor; // The subject.
-    fn get_obj(&self) -> &Actor; // The object.
-    fn get_env(&self) -> &Object; // Another object.
+pub trait Context {
+    fn get_me(&self) -> ObjectRef; // The subject.
+    fn get_obj(&self) -> ObjectRef; // The object.
+    fn get_env(&self) -> ObjectRef; // Another object.
 
-    fn get(&self, who: &str) -> Object<'a>; // ie obj2, num, str
+    fn get(&self, who: &str) -> ObjectRef; // ie obj2, num, str
 }
 
 /**
@@ -79,21 +83,6 @@ pub trait Context<'a> {
  */
 pub trait Template {
     fn render(&self, ctx: &Context, out: &Output);
-}
-
-// TODO: These functions should probably write to an Output instead.
-fn the(o: &Named, s: &mut String) {
-    if !o.is_short_proper() {
-        s.push_str("the ");
-    }
-    s.push_str(o.short_name());
-}
-
-fn the_(o: &Named, s: &mut String) {
-    if !o.is_long_proper() {
-        s.push_str("the ");
-    }
-    s.push_str(o.long_name());
 }
 
 // Used to decide between a/an.
@@ -321,17 +310,22 @@ impl Output for NullOutput {
 
 impl Viewer for NullOutput {
     /// Always returns false.
-    fn can_see(&self, _: &Actor) -> bool {
+    fn can_see(&self, _: &Object) -> bool {
         false
     }
 
     /// Always returns false.
-    fn can(&self, _: &str, _: &Actor) -> bool {
+    fn can(&self, _: &str, _: &Object) -> bool {
         false
     }
 
     /// Always returns false.
     fn has(&self, _: &str) -> bool {
+        false
+    }
+
+    /// Always returns false.
+    fn is_me(&self, _: &Object) -> bool {
         false
     }
 }
@@ -358,47 +352,64 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
+    fn is_plural(gender: Gender) -> bool {
+        match gender {
+            Gender::Plural => true,
+            _ => false,
+        }
+    }
+
     pub fn s(mut self, text: &str) -> Self {
         self.s.push_str(text);
         self.cap_it = false;
         self
     }
 
-    pub fn the<T>(mut self, obj: &T) -> Self
+    pub fn v_e<T>(mut self, obj: &T, text: &str) -> Self
     where
-        T: Actor,
+        T: Object,
     {
-        if self.o.can_see(obj) {
-            the(obj, &mut self.s);
-            self.cap_it = false;
-            self
-        } else if obj.is_short_proper() {
+        self.s.push_str(text);
+        self.cap_it = false;
+        if Self::is_plural(obj.gender()) && !self.o.is_me(obj) {
+            self.s.push('s');
+        }
+        self
+    }
+
+    fn the__<T>(mut self, obj: &T, name: &str, is_proper: bool) -> Self
+    where
+        T: Object,
+    {
+        if self.o.is_me(obj) {
+            self.s("you")
+        } else if self.o.can_see(obj) {
+            if !is_proper {
+                self = self.s("the ");
+            }
+            self.s(name)
+        } else if is_proper {
             self.s("someone")
         } else {
             self.s("something")
         }
     }
 
-    pub fn the_<T>(mut self, obj: &T) -> Self
-    where
-        T: Actor,
-    {
-        if self.o.can_see(obj) {
-            the_(obj, &mut self.s);
-            self.cap_it = false;
-            self
-        } else if obj.is_long_proper() {
-            self.s("someone")
-        } else {
-            self.s("something")
-        }
+    pub fn the<T: Object>(self, obj: &T) -> Self {
+        self.the__(obj, obj.short_name(), obj.is_short_proper())
+    }
+
+    pub fn the_<T: Object>(self, obj: &T) -> Self {
+        self.the__(obj, obj.long_name(), obj.is_long_proper())
     }
 
     pub fn a<T>(mut self, obj: &T) -> Self
     where
-        T: Actor,
+        T: Object,
     {
-        if self.o.can_see(obj) {
+        if self.o.is_me(obj) {
+            self.s("you")
+        } else if self.o.can_see(obj) {
             a(obj, &mut self.s);
             self.cap_it = false;
             self
@@ -411,9 +422,11 @@ impl<'a> OutputBuilder<'a> {
 
     pub fn a_<T>(mut self, obj: &T) -> Self
     where
-        T: Actor,
+        T: Object,
     {
-        if self.o.can_see(obj) {
+        if self.o.is_me(obj) {
+            self.s("you")
+        } else if self.o.can_see(obj) {
             a_(obj, &mut self.s);
             self.cap_it = false;
             self
@@ -429,37 +442,43 @@ impl<'a> OutputBuilder<'a> {
 mod tests {
     use super::*;
 
-    pub struct DebugActor {
+    pub struct DebugObject {
         named: Box<Named>,
+        me: bool,
     }
 
-    impl DebugActor {
-        pub fn new(name: &str) -> DebugActor {
+    impl DebugObject {
+        pub fn new(name: &str) -> DebugObject {
             let mut buff = std::io::Cursor::new("man:men\n");
             let nf = NamedFactory::new(&mut buff);
-            DebugActor {
+            DebugObject {
                 named: nf.create(name),
+                me: false,
             }
         }
     }
 
-    impl Actor for DebugActor {}
+    impl Object for DebugObject {}
 
-    impl Viewer for DebugActor {
-        fn can_see(&self, _who: &Actor) -> bool {
+    impl Viewer for DebugObject {
+        fn can_see(&self, _who: &Object) -> bool {
             true
         }
 
-        fn can(&self, _verb: &str, _who: &Actor) -> bool {
+        fn can(&self, _verb: &str, _who: &Object) -> bool {
             true
         }
 
         fn has(&self, _property: &str) -> bool {
             true
         }
+
+        fn is_me(&self, _: &Object) -> bool {
+            self.me
+        }
     }
 
-    impl Named for DebugActor {
+    impl Named for DebugObject {
         fn gender(&self) -> Gender {
             self.named.gender()
         }
@@ -555,47 +574,28 @@ mod tests {
     }
 
     #[test]
-    fn test_the() {
-        let man = DebugActor::new("man, old man, mob, angry mob");
-        let mut s: String = "".into();
-        the(&man, &mut s);
-        assert_eq!(s, "the man");
-
-        let mut s: String = "".into();
-        let ove = DebugActor::new("!Ove, !Ove Svensson");
-        the(&ove, &mut s);
-        assert_eq!(s, "Ove");
-    }
-
-    #[test]
-    fn test_the_() {
-        let man = DebugActor::new("man, old man, mob, angry mob");
-        let mut s: String = "".into();
-        the_(&man, &mut s);
-        assert_eq!(s, "the old man");
-
-        let mut s: String = "".into();
-        let ove = DebugActor::new("!Ove, !Ove Svensson");
-        the_(&ove, &mut s);
-        assert_eq!(s, "Ove Svensson");
-    }
-
-    #[test]
     fn test_a() {
         let mut s: String = "".into();
-        let ove = DebugActor::new("!Ove, !Ove Svensson");
+        let ove = DebugObject::new("!Ove, !Ove Svensson");
         a(&ove, &mut s);
         assert_eq!(s, "Ove");
 
-        let apple = DebugActor::new("apple");
+        let apple = DebugObject::new("apple");
         let mut s: String = "".into();
         a(&apple, &mut s);
         assert_eq!(s, "an apple");
 
-        let man = DebugActor::new("man, old man, mob, angry mob");
+        let man = DebugObject::new("man, old man, mob, angry mob");
         let mut s: String = "".into();
         a(&man, &mut s);
         assert_eq!(s, "a man");
+    }
+
+    #[test]
+    fn test_is_plural() {
+        assert_eq!(OutputBuilder::is_plural(Gender::Plural), true);
+        assert_eq!(OutputBuilder::is_plural(Gender::Male), false);
+        assert_eq!(OutputBuilder::is_plural(Gender::Female), false);
     }
 
     #[test]

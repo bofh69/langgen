@@ -1,4 +1,5 @@
 extern crate langgen;
+
 mod common;
 
 use common::*;
@@ -18,8 +19,8 @@ fn test_debug_output() {
 #[test]
 fn test_out() {
     let mut out = DebugOutput::new();
-    let ove = DebugActor::new("!Ove, !Ove Svensson");
-    let apple = DebugActor::new("apple, red apple");
+    let ove = DebugObject::new("!Ove, !Ove Svensson");
+    let apple = DebugObject::new("apple, red apple");
 
     out.out().the(&ove).s(" has ").a(&apple).s(".");
     assert_eq!(out.last_text, "Ove has an apple.");
@@ -39,18 +40,20 @@ fn test_out() {
     assert_eq!(out.text, "");
 }
 
-/*
 #[test]
 fn test_out_for_me() {
     let mut out = DebugOutput::new();
 
-    out.out().the(&out).s(" win.");
-    assert_eq!(out.last_text, "You win.");
+    let ove = DebugObject::new("!Ove, !Ove Svensson");
+
+    out.me = true;
+
+    out.out().the(&ove).s(" win.");
+    assert_eq!(out.last_text, "you win.");
     assert_eq!(out.text, "");
 
     out.can_see = false;
-    out.out().the(&out).s(" rulez.");
-    assert_eq!(out.last_text, "You win.");
+    out.out().the(&ove).s(" win.");
+    assert_eq!(out.last_text, "you win.");
     assert_eq!(out.text, "");
 }
-*/

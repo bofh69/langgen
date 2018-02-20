@@ -2,37 +2,43 @@ extern crate langgen;
 extern crate std;
 use langgen::*;
 
-pub struct DebugActor {
+pub struct DebugObject {
     named: Box<Named>,
+    pub me: bool,
 }
 
-impl DebugActor {
-    pub fn new(name: &str) -> DebugActor {
+impl DebugObject {
+    pub fn new(name: &str) -> DebugObject {
         let mut buff = std::io::Cursor::new("man:men\n");
         let nf = NamedFactory::new(&mut buff);
-        DebugActor {
+        DebugObject {
             named: nf.create(name),
+            me: false,
         }
     }
 }
 
-impl Actor for DebugActor {}
+impl Object for DebugObject {}
 
-impl Viewer for DebugActor {
-    fn can_see(&self, _who: &Actor) -> bool {
+impl Viewer for DebugObject {
+    fn can_see(&self, _who: &Object) -> bool {
         true
     }
 
-    fn can(&self, _verb: &str, _who: &Actor) -> bool {
+    fn can(&self, _verb: &str, _who: &Object) -> bool {
         true
     }
 
     fn has(&self, _property: &str) -> bool {
         true
     }
+
+    fn is_me(&self, _who: &Object) -> bool {
+        self.me
+    }
 }
 
-impl Named for DebugActor {
+impl Named for DebugObject {
     fn gender(&self) -> Gender {
         self.named.gender()
     }
@@ -74,9 +80,10 @@ pub struct DebugOutput {
     pub text: String,
     pub last_text: String,
     pub can_see: bool,
+    pub me: bool,
 }
 
-impl ::Actor for DebugOutput {}
+impl ::Object for DebugOutput {}
 
 impl ::Named for DebugOutput {
     fn gender(&self) -> Gender {
@@ -117,18 +124,22 @@ impl ::Named for DebugOutput {
 }
 
 impl ::Viewer for DebugOutput {
-    fn can_see(&self, _who: &Actor) -> bool {
+    fn can_see(&self, _who: &Object) -> bool {
         self.can_see
     }
 
-    // Ie the viewer can "hear" Actor.
-    fn can(&self, _verb: &str, _who: &Actor) -> bool {
+    // Ie the viewer can "hear" Object.
+    fn can(&self, _verb: &str, _who: &Object) -> bool {
         true
     }
 
     // Ie The viewer has the see_curse property?
     fn has(&self, _property: &str) -> bool {
         true
+    }
+
+    fn is_me(&self, _who: &Object) -> bool {
+        self.me
     }
 }
 
@@ -160,6 +171,7 @@ impl DebugOutput {
             text: String::new(),
             last_text: String::new(),
             can_see: true,
+            me: false,
         }
     }
 }
