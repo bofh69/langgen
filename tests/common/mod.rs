@@ -5,6 +5,7 @@ use langgen::*;
 pub struct DebugObject {
     named: Box<Named>,
     pub me: bool,
+    pub gender: Gender,
 }
 
 impl DebugObject {
@@ -14,6 +15,7 @@ impl DebugObject {
         DebugObject {
             named: nf.create(name),
             me: false,
+            gender: Gender::Female,
         }
     }
 }
@@ -40,7 +42,7 @@ impl Viewer for DebugObject {
 
 impl Named for DebugObject {
     fn gender(&self) -> Gender {
-        self.named.gender()
+        self.gender
     }
 
     fn is_short_proper(&self) -> bool {
@@ -81,46 +83,6 @@ pub struct DebugOutput {
     pub last_text: String,
     pub can_see: bool,
     pub me: bool,
-}
-
-impl ::Object for DebugOutput {}
-
-impl ::Named for DebugOutput {
-    fn gender(&self) -> Gender {
-        Gender::Female
-    }
-
-    fn is_short_proper(&self) -> bool {
-        true
-    }
-
-    fn short_name(&self) -> &str {
-        "Morgana"
-    }
-
-    fn is_long_proper(&self) -> bool {
-        true
-    }
-
-    fn long_name(&self) -> &str {
-        "Morgana the blue"
-    }
-
-    fn is_short_plural_proper(&self) -> bool {
-        false
-    }
-
-    fn short_plural_name(&self) -> &str {
-        "Morganas"
-    }
-
-    fn is_long_plural_proper(&self) -> bool {
-        true
-    }
-
-    fn long_plural_name(&self) -> &str {
-        "Blue Morganas"
-    }
 }
 
 impl ::Viewer for DebugOutput {
