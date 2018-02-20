@@ -91,6 +91,21 @@ pub trait Template {
     fn render(&self, ctx: &Context, out: &Output);
 }
 
+fn last_char(s: &str) -> Option<char> {
+    s.chars().rev().next()
+}
+
+fn needs_dot(s: &str) -> bool {
+    if let Some(c) = last_char(s) {
+        match c {
+            '.' | '?' | '!' | ':' | ';' | '"' => false,
+            _ => true,
+        }
+    } else {
+        false
+    }
+}
+
 // Used to decide between a/an.
 fn is_vowel(c: char) -> bool {
     match c {
@@ -318,16 +333,20 @@ impl Viewer for NullOutput {
     }
 }
 
-/// OutputBuilder helps with the fluent interface for Output::out()
+/// `OutputBuilder` helps with the fluent interface for `Output::out()`
 pub struct OutputBuilder<'a> {
     o: &'a mut Output,
     s: String,
     cap_it: bool,
 }
 
+/// Calles `Output::done()`.
 impl<'a> Drop for OutputBuilder<'a> {
     fn drop(&mut self) {
         self.o.write_text(&self.s);
+        if needs_dot(&self.s) {
+            self.o.write_text(".");
+        }
         self.o.done();
     }
 }
@@ -624,18 +643,34 @@ mod tests {
     }
 
     #[test]
-    fn test_uppercase_first_char()
-    {
+    fn test_uppercase_first_char() {
         for test in vec![
             ("nisse hult", "Nisse hult"),
             ("Nisse", "Nisse"),
             ("åsa", "Åsa"),
             ("\u{DF}-titanic", "SS-titanic"),
             ("ñet", "Ñet"),
-         ] {
+        ] {
             let mut s = String::new();
             uppercase_first_char(test.0, &mut s);
             assert_eq!(s, test.1);
+        }
+    }
+
+    #[test]
+    fn test_last_char() {
+        assert_eq!(last_char(""), None);
+        assert_eq!(last_char("a"), Some('a'));
+        assert_eq!(last_char("nissa\u{302}"), Some('\u{302}'));
+    }
+
+    #[test]
+    fn test_needs_dot() {
+        for s in vec!["a", "nissa"] {
+            assert_eq!(needs_dot(s), true);
+        }
+        for s in vec!["", "a.", "b!", "c?", "d:", "e;", "f\""] {
+            assert_eq!(needs_dot(s), false);
         }
     }
 }
