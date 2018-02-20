@@ -41,6 +41,40 @@ fn test_out() {
 }
 
 #[test]
+fn test_verb_endings() {
+    let mut out = DebugOutput::new();
+    let ove = DebugObject::new("!Ove, !Ove Svensson");
+    let apple = DebugObject::new("apple, red apple");
+    let mut apples = DebugObject::new("apples, red apples");
+    apples.gender = Gender::Plural;
+
+    out.out().the(&ove).v_e(&ove, " jump").s(".");
+    assert_eq!(out.last_text, "Ove jumps.");
+    assert_eq!(out.text, "");
+
+    out.out().the(&apple).v_e(&apple, " fall").s(".");
+    assert_eq!(out.last_text, "the apple falls.");
+    assert_eq!(out.text, "");
+
+    out.out().the(&apples).v_e(&apples, " fall").s(".");
+    assert_eq!(out.last_text, "the apples fall.");
+    assert_eq!(out.text, "");
+
+    out.can_see = false;
+
+    out.out().the(&ove).v_e(&ove, " jump").s(".");
+    assert_eq!(out.last_text, "someone jumps.");
+    assert_eq!(out.text, "");
+
+    out.out().the(&apple).v_e(&apple, " fall").s(".");
+    assert_eq!(out.last_text, "something falls.");
+    assert_eq!(out.text, "");
+
+    out.can_see = true;
+
+}
+
+#[test]
 fn test_out_for_me() {
     let mut out = DebugOutput::new();
 
