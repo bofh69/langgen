@@ -32,7 +32,7 @@ pub trait Named {
 }
 
 /**
- * Viewer's answer if they see, hear etc other actors.
+ * Viewer's answer if they see, hear etc other objects.
  * It also tells about properties of the Viewer.
  */
 pub trait Viewer {
@@ -97,6 +97,16 @@ fn is_vowel(c: char) -> bool {
         'a' | 'e' | 'i' | 'o' | 'u' => true,
         // y is usually not pronounced like a vowel.
         _ => false,
+    }
+}
+
+fn uppercase_first_char(s: &str, to: &mut String) {
+    let mut c = s.chars();
+    if let Some(ch) = c.next() {
+        for ch in ch.to_uppercase() {
+            to.push(ch);
+        }
+        to.push_str(c.as_str());
     }
 }
 
@@ -308,6 +318,7 @@ impl Viewer for NullOutput {
     }
 }
 
+/// OutputBuilder helps with the fluent interface for Output::out()
 pub struct OutputBuilder<'a> {
     o: &'a mut Output,
     s: String,
@@ -322,6 +333,8 @@ impl<'a> Drop for OutputBuilder<'a> {
 }
 
 impl<'a> OutputBuilder<'a> {
+    /// Creates a new OutputBuilder that will output
+    /// the text to Output.
     pub fn new(o: &'a mut Output) -> OutputBuilder<'a> {
         OutputBuilder {
             o: o,
@@ -330,6 +343,7 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
+    /// Is this gender supposed to be treated as singular?
     fn is_singular(gender: Gender) -> bool {
         match gender {
             Gender::Plural | Gender::Uncountable => false,
@@ -337,17 +351,41 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    pub fn s(mut self, text: &str) -> Self {
-        self.s.push_str(text);
+    /// The next thing that is output should not be capitalized.
+    pub fn dont_capitalize(mut self) -> Self {
         self.cap_it = false;
         self
     }
 
-    pub fn v_e<T>(mut self, obj: &T, text: &str) -> Self
+    /// The next thing that is output should be capitalized.
+    pub fn do_capitalize(mut self) -> Self {
+        self.cap_it = true;
+        self
+    }
+
+    /// Send the text to the Output.
+    /// The text is capitalized as needed.
+    pub fn s(mut self, text: &str) -> Self {
+        if self.cap_it {
+            self.cap_it = false;
+            uppercase_first_char(text, &mut self.s);
+            self
+        } else {
+            self.s.push_str(text);
+            self
+        }
+    }
+
+    /// Send the verb to the Output.
+    /// Appends 's' at the end of it, if needed.
+    pub fn v_e<T>(mut self, obj: &T, verb: &str) -> Self
     where
         T: Object,
     {
-        self.s.push_str(text);
+        // This is never first in a sentance, so no need to
+        // capitalize it.
+        assert!(!self.cap_it);
+        self.s.push_str(verb);
         self.cap_it = false;
         if Self::is_singular(obj.gender()) && !self.o.is_me(obj) {
             self.s.push('s');
@@ -373,10 +411,16 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
+    /// Sends "the object-short-name" to Output.
+    /// If the viewer can't see it, someone/something is sent instead.
+    /// The text is capitalized as needed.
     pub fn the<T: Object>(self, obj: &T) -> Self {
         self.the__(obj, obj.short_name(), obj.is_short_proper())
     }
 
+    /// Sends "the object-long-name" to Output.
+    /// If the viewer can't see it, someone/something is sent instead.
+    /// The text is capitalized as needed.
     pub fn the_<T: Object>(self, obj: &T) -> Self {
         self.the__(obj, obj.long_name(), obj.is_long_proper())
     }
@@ -409,10 +453,16 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
+    /// Sends "a/an object-short-name" to Output.
+    /// If the viewer can't see it, someone/something is sent instead.
+    /// The text is capitalized as needed.
     pub fn a<T: Object>(self, obj: &T) -> Self {
         self.a__(obj, obj.short_name(), obj.is_short_proper())
     }
 
+    /// Sends "a/an object-long-name" to Output.
+    /// If the viewer can't see it, someone/something is sent instead.
+    /// The text is capitalized as needed.
     pub fn a_<T: Object>(self, obj: &T) -> Self {
         self.a__(obj, obj.long_name(), obj.is_long_proper())
     }
@@ -570,6 +620,22 @@ mod tests {
 
         for c in "aeiou".chars() {
             assert_eq!(is_vowel(c), true, "{}", c);
+        }
+    }
+
+    #[test]
+    fn test_uppercase_first_char()
+    {
+        for test in vec![
+            ("nisse hult", "Nisse hult"),
+            ("Nisse", "Nisse"),
+            ("åsa", "Åsa"),
+            ("\u{DF}-titanic", "SS-titanic"),
+            ("ñet", "Ñet"),
+         ] {
+            let mut s = String::new();
+            uppercase_first_char(test.0, &mut s);
+            assert_eq!(s, test.1);
         }
     }
 }

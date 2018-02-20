@@ -29,24 +29,24 @@ fn test_out_a_and_the() {
     assert_eq!(out.text, "");
 
     out.out().the_(&apple).s(" has ").a(&ove).s(".");
-    assert_eq!(out.last_text, "the red apple has Ove.");
+    assert_eq!(out.last_text, "The red apple has Ove.");
     assert_eq!(out.text, "");
 
     out.out().the(&water).s(" is cold.");
-    assert_eq!(out.last_text, "the water is cold.");
+    assert_eq!(out.last_text, "The water is cold.");
     assert_eq!(out.text, "");
 
     out.out().a(&water);
-    assert_eq!(out.last_text, "water");
+    assert_eq!(out.last_text, "Water");
     assert_eq!(out.text, "");
 
     out.can_see = false;
     out.out().the(&ove).s(" has ").a(&apple).s(".");
-    assert_eq!(out.last_text, "someone has something.");
+    assert_eq!(out.last_text, "Someone has something.");
     assert_eq!(out.text, "");
 
     out.out().the_(&apple).s(" has ").a(&ove).s(".");
-    assert_eq!(out.last_text, "something has someone.");
+    assert_eq!(out.last_text, "Something has someone.");
     assert_eq!(out.text, "");
 }
 
@@ -63,21 +63,21 @@ fn test_verb_endings() {
     assert_eq!(out.text, "");
 
     out.out().the(&apple).v_e(&apple, " fall").s(".");
-    assert_eq!(out.last_text, "the apple falls.");
+    assert_eq!(out.last_text, "The apple falls.");
     assert_eq!(out.text, "");
 
     out.out().the(&apples).v_e(&apples, " fall").s(".");
-    assert_eq!(out.last_text, "the apples fall.");
+    assert_eq!(out.last_text, "The apples fall.");
     assert_eq!(out.text, "");
 
     out.can_see = false;
 
     out.out().the(&ove).v_e(&ove, " jump").s(".");
-    assert_eq!(out.last_text, "someone jumps.");
+    assert_eq!(out.last_text, "Someone jumps.");
     assert_eq!(out.text, "");
 
     out.out().the(&apple).v_e(&apple, " fall").s(".");
-    assert_eq!(out.last_text, "something falls.");
+    assert_eq!(out.last_text, "Something falls.");
     assert_eq!(out.text, "");
 
     out.can_see = true;
@@ -92,11 +92,11 @@ fn test_out_for_me() {
     out.me = true;
 
     out.out().the(&ove).v_e(&ove, " win");
-    assert_eq!(out.last_text, "you win");
+    assert_eq!(out.last_text, "You win");
     assert_eq!(out.text, "");
 
     out.can_see = false;
     out.out().the(&ove).v_e(&ove, " win");
-    assert_eq!(out.last_text, "you win");
+    assert_eq!(out.last_text, "You win");
     assert_eq!(out.text, "");
 }
