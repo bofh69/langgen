@@ -1,8 +1,22 @@
 mod suffix;
 
 /*
+ * TODO: thes (the wand's/your), thes_ (the long wand's/your),
+ * TODO: thess (the long wand's/yours),
+ * TODO: my/my_ (your/his/her/its/their long wand/Gandalf/you),
+ * TODO: word/word_ (long wand)
+ * TODO: plural/plural_ (the long wands)
+ * TODO: is (is/are)
+ * TODO: has (has/have)
+ * TODO: he
+ * TODO: he_s
+ * TODO: hiss
+ * TODO: him
+ * TODO: himself
+ * TODO: snum - number as string
+ * TODO: num - 1st, 2nd, 3rd, 4th ...
  * TODO: Named::gender should perhaps be moved to Object
- * TODO Aliases on Named & NamedFactory: Gandalf, Gandalf the gray, %man, %gray
+ * TODO: Aliases on Named & NamedFactory: Gandalf, Gandalf the gray, %man, %gray
  */
 
 /// The gender of Named:s.
@@ -338,6 +352,7 @@ pub struct OutputBuilder<'a> {
     o: &'a mut Output,
     s: String,
     cap_it: bool,
+    add_space: bool,
 }
 
 /// Calles `Output::done()`.
@@ -359,6 +374,7 @@ impl<'a> OutputBuilder<'a> {
             o: o,
             s: String::new(),
             cap_it: true,
+            add_space: false,
         }
     }
 
@@ -385,6 +401,10 @@ impl<'a> OutputBuilder<'a> {
     /// Send the text to the Output.
     /// The text is capitalized as needed.
     pub fn s(mut self, text: &str) -> Self {
+        if self.add_space {
+            self.s.push(' ');
+        }
+        self.add_space = true;
         if self.cap_it {
             self.cap_it = false;
             uppercase_first_char(text, &mut self.s);
@@ -404,11 +424,15 @@ impl<'a> OutputBuilder<'a> {
         // This is never first in a sentance, so no need to
         // capitalize it.
         assert!(!self.cap_it);
+        if self.add_space {
+            self.s.push(' ');
+        }
         self.s.push_str(verb);
         self.cap_it = false;
         if Self::is_singular(obj.gender()) && !self.o.is_me(obj) {
             self.s.push('s');
         }
+        self.add_space = true;
         self
     }
 
@@ -420,7 +444,7 @@ impl<'a> OutputBuilder<'a> {
             self.s("you")
         } else if self.o.can_see(obj) {
             if !is_proper {
-                self = self.s("the ");
+                self = self.s("the");
             }
             self.s(name)
         } else if is_proper {
@@ -459,9 +483,9 @@ impl<'a> OutputBuilder<'a> {
                     }
                 }
                 self = if should_be_an {
-                    self.s("an ")
+                    self.s("an")
                 } else {
-                    self.s("a ")
+                    self.s("a")
                 }
             }
             self.s(name)
