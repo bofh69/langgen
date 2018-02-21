@@ -23,6 +23,8 @@ fn test_out_a_and_the() {
     let apple = DebugObject::new("apple, red apple");
     let mut water = DebugObject::new("water, cold water");
     water.gender = Gender::Uncountable;
+    let mut coins = DebugObject::new("coins, gold coins");
+    coins.gender = Gender::Plural;
 
     out.out().the(&ove).s("has").a(&apple);
     assert_eq!(out.last_text, "Ove has an apple.");
@@ -37,7 +39,11 @@ fn test_out_a_and_the() {
     assert_eq!(out.text, "");
 
     out.out().a(&water);
-    assert_eq!(out.last_text, "Water.");
+    assert_eq!(out.last_text, "Some water.");
+    assert_eq!(out.text, "");
+
+    out.out().a(&coins).s("and").a_(&coins);
+    assert_eq!(out.last_text, "Some coins and some gold coins.");
     assert_eq!(out.text, "");
 
     out.can_see = false;

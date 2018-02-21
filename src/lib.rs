@@ -487,6 +487,8 @@ impl<'a> OutputBuilder<'a> {
                 } else {
                     self.s("a")
                 }
+            } else if !is_prop {
+                self = self.s("some");
             }
             self.s(name)
         } else if obj.is_long_proper() {
