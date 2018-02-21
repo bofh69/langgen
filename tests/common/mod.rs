@@ -16,36 +16,29 @@ impl DebugObject {
             me: false,
         }
     }
-    pub fn adam() -> Self
-    {
+    pub fn adam() -> Self {
         DebugObject::new("!Adam, !Adam Evasman", Gender::Male, false)
     }
 
-    pub fn eva() -> Self
-    {
+    pub fn eva() -> Self {
         DebugObject::new("!Eva, !Eva Adamsfru", Gender::Female, false)
     }
 
-    pub fn apple() -> Self
-    {
+    pub fn apple() -> Self {
         DebugObject::new("apple, green apple", Gender::Neuter, true)
     }
 
-    pub fn apples() -> Self
-    {
+    pub fn apples() -> Self {
         DebugObject::new("apples, red apples", Gender::Plural, true)
     }
 
-    pub fn knife() -> Self
-    {
+    pub fn knife() -> Self {
         DebugObject::new("knife, dull knife", Gender::Neuter, true)
     }
 
-    pub fn water() -> Self
-    {
+    pub fn water() -> Self {
         DebugObject::new("water, cold water", Gender::Uncountable, true)
     }
-
 }
 
 impl Object for DebugObject {}

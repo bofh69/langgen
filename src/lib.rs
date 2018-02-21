@@ -3,7 +3,6 @@ mod suffix;
 /*
  * TODO: someone/something should be decided depending on if it is a
  *       thing or not.
- * TODO: my/my_ (your/his/her/its/their long wand/Gandalf/you),
  * TODO: thes (the wand's/your), thes_ (the long wand's/your),
  * TODO: thess (the long wand's/yours),
  * TODO: my/my_ (your/his/her/its/their long wand/Gandalf/you),
@@ -523,6 +522,48 @@ impl<'a> OutputBuilder<'a> {
     /// The text is capitalized as needed.
     pub fn a_<T: Object>(self, obj: &T) -> Self {
         self.a__(obj, obj.long_name(), obj.is_long_proper())
+    }
+
+    pub fn my<TW, TO>(mut self, who: &TW, obj: &TO) -> Self
+    where
+        TW: Object,
+        TO: Object,
+    {
+        if self.o.is_me(who) {
+            self = self.s("your").s(obj.short_name());
+        } else if self.o.can_see(who) {
+            let pron = match who.gender() {
+                Gender::Male => "his",
+                Gender::Female => "her",
+                Gender::Plural => "their",
+                _ => "its",
+            };
+            self = self.s(pron).s(obj.short_name());
+        } else {
+            self = self.a(obj);
+        }
+        self
+    }
+
+    pub fn my_<TW, TO>(mut self, who: &TW, obj: &TO) -> Self
+    where
+        TW: Object,
+        TO: Object,
+    {
+        if self.o.is_me(who) {
+            self = self.s("your").s(obj.long_name());
+        } else if self.o.can_see(who) {
+            let pron = match who.gender() {
+                Gender::Male => "his",
+                Gender::Female => "her",
+                Gender::Plural => "their",
+                _ => "its",
+            };
+            self = self.s(pron).s(obj.long_name());
+        } else {
+            self = self.a_(obj);
+        }
+        self
     }
 }
 

@@ -104,14 +104,13 @@ fn test_out_for_me() {
     assert_eq!(out.text, "");
 }
 
-/*
 #[test]
 fn test_my() {
     let mut out = DebugOutput::new();
-    let adam = DebugOutput::adam();
+    let adam = DebugObject::adam();
     let eva = DebugObject::eva();
     let apple = DebugObject::apple();
-    let mut apples = DebugObject::apples();
+    let apples = DebugObject::apples();
 
     out.out().my(&adam, &apple);
     assert_eq!(out.last_text, "His apple.");
@@ -125,9 +124,28 @@ fn test_my() {
     out.out().my(&apple, &apple);
     assert_eq!(out.last_text, "Its apple.");
 
+    out.out().my_(&adam, &apple);
+    assert_eq!(out.last_text, "His green apple.");
+
+    out.out().my_(&eva, &apple);
+    assert_eq!(out.last_text, "Her green apple.");
+
+    out.out().my_(&apples, &apple);
+    assert_eq!(out.last_text, "Their green apple.");
+
+    out.out().my_(&apple, &apple);
+    assert_eq!(out.last_text, "Its green apple.");
+
     out.can_see = false;
     out.out().my(&adam, &apple);
     assert_eq!(out.last_text, "Something.");
 
+    out.out().my(&adam, &apples);
+    assert_eq!(out.last_text, "Something.");
+
+    out.out().my_(&adam, &apple);
+    assert_eq!(out.last_text, "Something.");
+
+    out.out().my_(&adam, &apples);
+    assert_eq!(out.last_text, "Something.");
 }
-*/
