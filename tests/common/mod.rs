@@ -5,19 +5,47 @@ use langgen::*;
 pub struct DebugObject {
     named: Box<Named>,
     pub me: bool,
-    pub gender: Gender,
 }
 
 impl DebugObject {
-    pub fn new(name: &str) -> DebugObject {
+    pub fn new(name: &str, sex: Gender, thing: bool) -> DebugObject {
         let mut buff = std::io::Cursor::new("man:men\n");
         let nf = NamedFactory::new(&mut buff);
         DebugObject {
-            named: nf.create(name),
+            named: nf.create(name, sex, thing),
             me: false,
-            gender: Gender::Female,
         }
     }
+    pub fn adam() -> Self
+    {
+        DebugObject::new("!Adam, !Adam Evasman", Gender::Male, false)
+    }
+
+    pub fn eva() -> Self
+    {
+        DebugObject::new("!Eva, !Eva Adamsfru", Gender::Female, false)
+    }
+
+    pub fn apple() -> Self
+    {
+        DebugObject::new("apple, green apple", Gender::Neuter, true)
+    }
+
+    pub fn apples() -> Self
+    {
+        DebugObject::new("apples, red apples", Gender::Plural, true)
+    }
+
+    pub fn knife() -> Self
+    {
+        DebugObject::new("knife, dull knife", Gender::Neuter, true)
+    }
+
+    pub fn water() -> Self
+    {
+        DebugObject::new("water, cold water", Gender::Uncountable, true)
+    }
+
 }
 
 impl Object for DebugObject {}
@@ -42,7 +70,11 @@ impl Viewer for DebugObject {
 
 impl Named for DebugObject {
     fn gender(&self) -> Gender {
-        self.gender
+        self.named.gender()
+    }
+
+    fn is_thing(&self) -> bool {
+        self.named.is_thing()
     }
 
     fn is_short_proper(&self) -> bool {

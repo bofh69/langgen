@@ -7,18 +7,18 @@ use langgen::*;
 
 #[test]
 fn short_name() {
-    let ove = DebugObject::new("!Ove, !Ove Svensson");
-    assert_eq!(ove.short_name(), "Ove");
+    let adam = DebugObject::adam();
+    assert_eq!(adam.short_name(), "Adam");
 
-    let eva = DebugObject::new("Eva, Eva Stinasson");
+    let eva = DebugObject::eva();
     assert_eq!(eva.short_name(), "Eva");
 }
 
 #[test]
 fn long_name() {
-    let ove = DebugObject::new("Ove, Ove Svensson");
-    assert_eq!(ove.long_name(), "Ove Svensson");
+    let adam = DebugObject::adam();
+    assert_eq!(adam.long_name(), "Adam Evasman");
 
-    let eva = DebugObject::new("Eva, Eva Stinasson");
-    assert_eq!(eva.long_name(), "Eva Stinasson");
+    let eva = DebugObject::eva();
+    assert_eq!(eva.long_name(), "Eva Adamsfru");
 }

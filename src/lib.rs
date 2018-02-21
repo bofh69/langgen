@@ -1,6 +1,9 @@
 mod suffix;
 
 /*
+ * TODO: someone/something should be decided depending on if it is a
+ *       thing or not.
+ * TODO: my/my_ (your/his/her/its/their long wand/Gandalf/you),
  * TODO: thes (the wand's/your), thes_ (the long wand's/your),
  * TODO: thess (the long wand's/yours),
  * TODO: my/my_ (your/his/her/its/their long wand/Gandalf/you),
@@ -33,6 +36,8 @@ pub enum Gender {
 pub trait Named {
     /// The gender of the Named.
     fn gender(&self) -> Gender;
+
+    fn is_thing(&self) -> bool;
 
     fn is_short_proper(&self) -> bool;
     fn short_name(&self) -> &str;
@@ -150,6 +155,8 @@ struct NamedImpl {
     long_proper_name: bool,
     short_proper_plural_name: bool,
     long_proper_plural_name: bool,
+    gender: Gender,
+    thing: bool,
 }
 
 impl NamedFactory {
@@ -213,7 +220,7 @@ impl NamedFactory {
         ret
     }
 
-    pub fn create(&self, name: &str) -> Box<Named> {
+    pub fn create(&self, name: &str, gender: Gender, is_thing: bool) -> Box<Named> {
         let mut names: Vec<String> = name.split(',')
             .map(|s| String::from(s.trim_left()))
             .collect();
@@ -267,13 +274,19 @@ impl NamedFactory {
             long_proper_name: long_proper_name,
             short_proper_plural_name: short_proper_plural_name,
             long_proper_plural_name: long_proper_plural_name,
+            gender: gender,
+            thing: is_thing,
         }) as Box<Named>
     }
 }
 
 impl Named for NamedImpl {
     fn gender(&self) -> Gender {
-        Gender::Female
+        self.gender
+    }
+
+    fn is_thing(&self) -> bool {
+        self.thing
     }
 
     fn is_short_proper(&self) -> bool {
@@ -523,11 +536,11 @@ mod tests {
     }
 
     impl DebugObject {
-        pub fn new(name: &str) -> DebugObject {
+        pub fn new(name: &str, sex: Gender, thing: bool) -> DebugObject {
             let mut buff = std::io::Cursor::new("man:men\n");
             let nf = NamedFactory::new(&mut buff);
             DebugObject {
-                named: nf.create(name),
+                named: nf.create(name, sex, thing),
                 me: false,
             }
         }
@@ -556,6 +569,10 @@ mod tests {
     impl Named for DebugObject {
         fn gender(&self) -> Gender {
             self.named.gender()
+        }
+
+        fn is_thing(&self) -> bool {
+            self.named.is_thing()
         }
 
         fn is_short_proper(&self) -> bool {
@@ -599,52 +616,52 @@ mod tests {
     #[test]
     fn short_name() {
         let nf = get_named_fac();
-        let ove = nf.create("!Ove, !Ove Svensson");
+        let ove = nf.create("!Ove, !Ove Svensson", Gender::Male, false);
         assert_eq!(ove.short_name(), "Ove");
 
-        let eva = nf.create("Eva, Eva Stinasson");
+        let eva = nf.create("Eva, Eva Stinasson", Gender::Female, false);
         assert_eq!(eva.short_name(), "Eva");
     }
 
     #[test]
     fn short_plural() {
         let nf = get_named_fac();
-        let man = nf.create("man, old man, mob, angry mob");
+        let man = nf.create("man, old man, mob, angry mob", Gender::Male, false);
         assert_eq!(man.short_plural_name(), "mob");
 
-        let orc = nf.create("orc, blue orc");
+        let orc = nf.create("orc, blue orc", Gender::Male, false);
         assert_eq!(orc.short_plural_name(), "orcs");
 
-        let kiss = nf.create("kiss");
+        let kiss = nf.create("kiss", Gender::Neuter, true);
         assert_eq!(kiss.short_plural_name(), "kisses");
 
-        let knife = nf.create("knife, dull knife");
+        let knife = nf.create("knife, dull knife", Gender::Neuter, true);
         assert_eq!(knife.short_plural_name(), "knives");
     }
 
     #[test]
     fn long_name() {
         let nf = get_named_fac();
-        let ove = nf.create("!Ove, !Ove Svensson");
+        let ove = nf.create("!Ove, !Ove Svensson", Gender::Male, false);
         assert_eq!(ove.long_name(), "Ove Svensson");
 
-        let eva = nf.create("Eva, Eva Stinasson");
+        let eva = nf.create("Eva, Eva Stinasson", Gender::Female, false);
         assert_eq!(eva.long_name(), "Eva Stinasson");
     }
 
     #[test]
     fn long_plural() {
         let nf = get_named_fac();
-        let man = nf.create("man, old man, mob, angry mob");
+        let man = nf.create("man, old man, mob, angry mob", Gender::Male, false);
         assert_eq!(man.long_plural_name(), "angry mob");
 
-        let orc = nf.create("orc, blue orc");
+        let orc = nf.create("orc, blue orc", Gender::Male, false);
         assert_eq!(orc.long_plural_name(), "blue orcs");
 
-        let kiss = nf.create("kiss");
+        let kiss = nf.create("kiss", Gender::Neuter, true);
         assert_eq!(kiss.long_plural_name(), "kisses");
 
-        let knife = nf.create("knife, dull knife");
+        let knife = nf.create("knife, dull knife", Gender::Neuter, true);
         assert_eq!(knife.long_plural_name(), "dull knives");
     }
 
