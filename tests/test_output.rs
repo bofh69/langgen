@@ -149,3 +149,81 @@ fn test_my() {
     out.out().my_(&adam, &apples);
     assert_eq!(out.last_text, "Something.");
 }
+
+#[test]
+fn test_is_are() {
+    let mut out = DebugOutput::new();
+    let adam = DebugObject::adam();
+    let eva = DebugObject::eva();
+    let apple = DebugObject::apple();
+    let apples = DebugObject::apples();
+
+    out.out().the(&adam).is(&adam);
+    assert_eq!(out.last_text, "Adam is.");
+
+    out.out().the(&eva).is(&eva);
+    assert_eq!(out.last_text, "Eva is.");
+
+    out.out().the(&apple).is(&apple);
+    assert_eq!(out.last_text, "The apple is.");
+
+    out.out().the(&apples).is(&apples);
+    assert_eq!(out.last_text, "The apples are.");
+
+    out.me = true;
+
+    out.out().the(&adam).is(&adam);
+    assert_eq!(out.last_text, "You are.");
+
+    out.me = false;
+
+    out.can_see = false;
+
+    out.out().the(&adam).is(&adam);
+    assert_eq!(out.last_text, "Someone is.");
+
+    out.out().the(&apple).is(&apple);
+    assert_eq!(out.last_text, "Something is.");
+
+    out.out().the(&apples).is(&apples);
+    assert_eq!(out.last_text, "Something is.");
+}
+
+#[test]
+fn test_has_have() {
+    let mut out = DebugOutput::new();
+    let adam = DebugObject::adam();
+    let eva = DebugObject::eva();
+    let apple = DebugObject::apple();
+    let apples = DebugObject::apples();
+
+    out.out().the(&adam).has(&adam);
+    assert_eq!(out.last_text, "Adam has.");
+
+    out.out().the(&eva).has(&eva);
+    assert_eq!(out.last_text, "Eva has.");
+
+    out.out().the(&apple).has(&apple);
+    assert_eq!(out.last_text, "The apple has.");
+
+    out.out().the(&apples).has(&apples);
+    assert_eq!(out.last_text, "The apples have.");
+
+    out.me = true;
+
+    out.out().the(&adam).has(&adam);
+    assert_eq!(out.last_text, "You have.");
+
+    out.me = false;
+
+    out.can_see = false;
+
+    out.out().the(&adam).has(&adam);
+    assert_eq!(out.last_text, "Someone has.");
+
+    out.out().the(&apple).has(&apple);
+    assert_eq!(out.last_text, "Something has.");
+
+    out.out().the(&apples).has(&apples);
+    assert_eq!(out.last_text, "Something has.");
+}

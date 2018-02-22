@@ -5,11 +5,8 @@ mod suffix;
  *       thing or not.
  * TODO: thes (the wand's/your), thes_ (the long wand's/your),
  * TODO: thess (the long wand's/yours),
- * TODO: my/my_ (your/his/her/its/their long wand/Gandalf/you),
  * TODO: word/word_ (long wand)
  * TODO: plural/plural_ (the long wands)
- * TODO: is (is/are)
- * TODO: has (has/have)
  * TODO: he
  * TODO: he_s
  * TODO: hiss
@@ -22,7 +19,7 @@ mod suffix;
  */
 
 /// The gender of Named:s.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Gender {
     Male,
     Female,
@@ -564,6 +561,36 @@ impl<'a> OutputBuilder<'a> {
             self = self.a_(obj);
         }
         self
+    }
+
+    fn sing_plur_<T>(self, who: &T, singular: &str, plural: &str) -> Self
+    where
+        T: Object,
+    {
+        let mut g = who.gender();
+        if self.o.is_me(who) {
+            g = Gender::Plural;
+        } else if !self.o.can_see(who) {
+            g = Gender::Male;
+        }
+        self.s(match g {
+            Gender::Plural => plural,
+            _ => singular,
+        })
+    }
+
+    pub fn is<T>(self, who: &T) -> Self
+    where
+        T: Object,
+    {
+        self.sing_plur_(who, "is", "are")
+    }
+
+    pub fn has<T>(self, who: &T) -> Self
+    where
+        T: Object,
+    {
+        self.sing_plur_(who, "has", "have")
     }
 }
 
