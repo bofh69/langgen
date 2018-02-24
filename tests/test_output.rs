@@ -24,11 +24,11 @@ fn test_out_a_and_the() {
     let water = DebugObject::water();
     let apples = DebugObject::apples();
 
-    out.out().the(&adam).s("has").a(&apple);
+    out.out().the(&adam).has(&adam).a(&apple);
     assert_eq!(out.last_text, "Adam has an apple.");
     assert_eq!(out.text, "");
 
-    out.out().the_(&apple).s("has").a(&adam);
+    out.out().the_(&apple).has(&apple).a(&adam);
     assert_eq!(out.last_text, "The green apple has Adam.");
     assert_eq!(out.text, "");
 
@@ -58,12 +58,77 @@ fn test_out_a_and_the() {
 fn test_verb_endings() {
     let mut out = DebugOutput::new();
     let adam = DebugObject::adam();
+    let eva = DebugObject::eva();
     let apple = DebugObject::apple();
     let apples = DebugObject::apples();
 
     out.out().the(&adam).v_e(&adam, "jump").s("down");
     assert_eq!(out.last_text, "Adam jumps down.");
     assert_eq!(out.text, "");
+
+    out.out().the(&adam).v_e(&adam, "SCREAM");
+    assert_eq!(out.last_text, "Adam SCREAMS.");
+
+    out.out().the(&eva).v_e(&eva, "kiss");
+    assert_eq!(out.last_text, "Eva kisses.");
+
+    out.out().the(&eva).v_e(&eva, "KISS");
+    assert_eq!(out.last_text, "Eva KISSES.");
+
+    out.out().the(&adam).v_e(&adam, "pry");
+    assert_eq!(out.last_text, "Adam pries.");
+
+    out.out().the(&adam).v_e(&adam, "PRY");
+    assert_eq!(out.last_text, "Adam PRIES.");
+
+    out.out().the(&adam).v_e(&adam, "ay");
+    assert_eq!(out.last_text, "Adam ays.");
+
+    /*
+     * These become incorrect:
+     *
+    out.out().the(&adam).v_e(&adam, "volly");
+    assert_eq!(out.last_text, "Adam vollies.");
+
+    out.out().the(&adam).v_e(&adam, "VOLLY");
+    assert_eq!(out.last_text, "Adam VOLLIES.");
+    */
+
+    out.out().the(&adam).v_e(&adam, "zzz");
+    assert_eq!(out.last_text, "Adam zzzes.");
+
+    out.out().the(&adam).v_e(&adam, "ZZZ");
+    assert_eq!(out.last_text, "Adam ZZZES.");
+
+    out.out().the(&adam).v_e(&adam, "o");
+    assert_eq!(out.last_text, "Adam oes.");
+
+    out.out().the(&adam).v_e(&adam, "O");
+    assert_eq!(out.last_text, "Adam OES.");
+
+    out.out().the(&adam).v_e(&adam, "xxx");
+    assert_eq!(out.last_text, "Adam xxxes.");
+
+    out.out().the(&adam).v_e(&adam, "XXX");
+    assert_eq!(out.last_text, "Adam XXXES.");
+
+    out.out().the(&adam).v_e(&adam, "ch");
+    assert_eq!(out.last_text, "Adam ches.");
+
+    out.out().the(&adam).v_e(&adam, "CH");
+    assert_eq!(out.last_text, "Adam CHES.");
+
+    out.out().the(&adam).v_e(&adam, "sh");
+    assert_eq!(out.last_text, "Adam shes.");
+
+    out.out().the(&adam).v_e(&adam, "SH");
+    assert_eq!(out.last_text, "Adam SHES.");
+
+    out.out().the(&adam).v_e(&adam, "ah");
+    assert_eq!(out.last_text, "Adam ahs.");
+
+    out.out().the(&adam).v_e(&adam, "AH");
+    assert_eq!(out.last_text, "Adam AHS.");
 
     out.out().the(&apple).v_e(&apple, "fall");
     assert_eq!(out.last_text, "The apple falls.");
@@ -226,4 +291,39 @@ fn test_has_have() {
 
     out.out().the(&apples).has(&apples);
     assert_eq!(out.last_text, "Something has.");
+}
+
+#[test]
+fn test_thes() {
+    let mut out = DebugOutput::new();
+    let adam = DebugObject::adam();
+    let eva = DebugObject::eva();
+    let apple = DebugObject::apple();
+    let apples = DebugObject::apples();
+
+    out.out().thes(&adam);
+    assert_eq!(out.last_text, "Adam's.");
+    out.out().thes(&eva);
+    assert_eq!(out.last_text, "Eva's.");
+    out.out().thes(&apple);
+    assert_eq!(out.last_text, "The apple's.");
+    out.out().thes(&apples);
+    assert_eq!(out.last_text, "The apples'.");
+
+    out.can_see = false;
+
+    out.out().thes(&adam);
+    assert_eq!(out.last_text, "Someone's.");
+    out.out().thes(&eva);
+    assert_eq!(out.last_text, "Someone's.");
+    out.out().thes(&apple);
+    assert_eq!(out.last_text, "Something's.");
+    out.out().thes(&apples);
+    assert_eq!(out.last_text, "Some's.");
+
+    out.can_see = true;
+    out.me = true;
+
+    out.out().thes(&adam);
+    assert_eq!(out.last_text, "Your.");
 }

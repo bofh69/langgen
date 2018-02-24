@@ -124,7 +124,8 @@ fn needs_dot(s: &str) -> bool {
 // Used to decide between a/an.
 fn is_vowel(c: char) -> bool {
     match c {
-        'a' | 'e' | 'i' | 'o' | 'u' => true,
+        'a' | 'e' | 'i' | 'o' | 'u' |
+        'A' | 'E' | 'I' | 'O' | 'U' => true,
         // y is usually not pronounced like a vowel.
         _ => false,
     }
@@ -424,6 +425,61 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
+    fn add_s(str: &mut String)
+    {
+        let mut add : &str = "";
+        let mut uc = false;
+        let mut remove = 0;
+
+        {
+            let mut ci = str.chars().rev();
+            if let Some(ch) = ci.next() {
+                if ch.is_uppercase() {
+                    uc = true;
+                }
+                add = match ch {
+                    's' | 'o' | 'z' | 'x' |
+                    'S' | 'O' | 'Z' | 'X' => "es",
+                    'y' | 'Y' => {
+                        remove = 1;
+                        if let Some(c2) = ci.next() {
+                            if !is_vowel(c2) {
+                                "ies"
+                            } else {
+                                remove = 0;
+                                "s"
+                            }
+                        } else {
+                            "ies"
+                        }
+                    }
+                    'h' | 'H' => {
+                        if let Some(c2) = ci.next() {
+                            if c2 == 'c' || c2 == 's' ||
+                               c2 == 'C' || c2 == 'S' {
+                                "es"
+                            } else {
+                                "s"
+                            }
+                        } else {
+                            "s"
+                        }
+                    }
+                    _ => "s",
+                }
+            }
+        }
+        while remove > 0 {
+            str.pop();
+            remove -= 1;
+        }
+        if uc {
+            str.push_str(&add.to_uppercase());
+        } else {
+            str.push_str(add);
+        }
+    }
+
     /// Send the verb to the Output.
     /// Appends 's' at the end of it, if needed.
     pub fn v_e<T>(mut self, obj: &T, verb: &str) -> Self
@@ -438,11 +494,11 @@ impl<'a> OutputBuilder<'a> {
         }
         self.s.push_str(verb);
         self.cap_it = false;
+        self.add_space = false;
         if Self::is_singular(obj.gender()) && !self.o.is_me(obj) {
-            self.s.push('s');
+            Self::add_s(&mut self.s);
         }
-        self.add_space = true;
-        self
+        self.s("")
     }
 
     fn the__<T>(mut self, obj: &T, name: &str, is_proper: bool) -> Self
@@ -563,7 +619,7 @@ impl<'a> OutputBuilder<'a> {
         self
     }
 
-    fn sing_plur_<T>(self, who: &T, singular: &str, plural: &str) -> Self
+    pub fn sing_plur<T>(self, who: &T, singular: &str, plural: &str) -> Self
     where
         T: Object,
     {
@@ -583,14 +639,21 @@ impl<'a> OutputBuilder<'a> {
     where
         T: Object,
     {
-        self.sing_plur_(who, "is", "are")
+        self.sing_plur(who, "is", "are")
     }
 
     pub fn has<T>(self, who: &T) -> Self
     where
         T: Object,
     {
-        self.sing_plur_(who, "has", "have")
+        self.sing_plur(who, "has", "have")
+    }
+
+    pub fn thes<T>(self, who: &T) -> Self
+    where
+        T: Object,
+    {
+        unimplemented!();
     }
 }
 
@@ -744,11 +807,11 @@ mod tests {
 
     #[test]
     fn test_is_vowel() {
-        for c in "bcdfghjklmnpqrstvwxyz".chars() {
+        for c in "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ".chars() {
             assert_eq!(is_vowel(c), false, "{}", c);
         }
 
-        for c in "aeiou".chars() {
+        for c in "aeiouAEIOU".chars() {
             assert_eq!(is_vowel(c), true, "{}", c);
         }
     }
