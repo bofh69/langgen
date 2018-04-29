@@ -319,11 +319,46 @@ fn test_thes() {
     out.out().thes(&apple);
     assert_eq!(out.last_text, "Something's.");
     out.out().thes(&apples);
-    assert_eq!(out.last_text, "Some's.");
+    assert_eq!(out.last_text, "Something's.");
 
     out.can_see = true;
     out.me = true;
 
     out.out().thes(&adam);
+    assert_eq!(out.last_text, "Your.");
+}
+
+#[test]
+fn test_thes_() {
+    let mut out = DebugOutput::new();
+    let adam = DebugObject::adam();
+    let eva = DebugObject::eva();
+    let apple = DebugObject::apple();
+    let apples = DebugObject::apples();
+
+    out.out().thes_(&adam);
+    assert_eq!(out.last_text, "Adam Evasman's.");
+    out.out().thes_(&eva);
+    assert_eq!(out.last_text, "Eva Adamsfru's.");
+    out.out().thes_(&apple);
+    assert_eq!(out.last_text, "The green apple's.");
+    out.out().thes_(&apples);
+    assert_eq!(out.last_text, "The red apples'.");
+
+    out.can_see = false;
+
+    out.out().thes_(&adam);
+    assert_eq!(out.last_text, "Someone's.");
+    out.out().thes_(&eva);
+    assert_eq!(out.last_text, "Someone's.");
+    out.out().thes_(&apple);
+    assert_eq!(out.last_text, "Something's.");
+    out.out().thes_(&apples);
+    assert_eq!(out.last_text, "Something's.");
+
+    out.can_see = true;
+    out.me = true;
+
+    out.out().thes_(&adam);
     assert_eq!(out.last_text, "Your.");
 }
