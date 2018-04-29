@@ -549,7 +549,7 @@ impl<'a> OutputBuilder<'a> {
                 self = self.s("some");
             }
             self.s(name)
-        } else if obj.is_long_proper() {
+        } else if is_prop {
             self.s("someone")
         } else {
             self.s("something")
@@ -642,28 +642,78 @@ impl<'a> OutputBuilder<'a> {
         self.sing_plur(who, "has", "have")
     }
 
-    pub fn thes<T>(self, who: &T) -> Self
+    pub fn thes<T>(self, obj: &T) -> Self
+    where
+        T: Object,
+    {
+        if self.o.is_me(obj) {
+            self.s("your")
+        } else if self.o.can_see(obj) {
+            if let Some(ch) = obj.short_name().chars().rev().next() {
+                let uc = ch.is_uppercase();
+                let add = match ch {
+                    's' | 'S' => "'",
+                    _ => {
+                        if uc {
+                            "'S"
+                        } else {
+                            "'s"
+                        }
+                    }
+                };
+                let mut s2 = self.the(obj);
+                s2.add_space = false;
+                s2.s(add)
+            } else {
+                self
+            }
+        } else if obj.is_short_proper() {
+            self.s("someone's")
+        } else {
+            self.s("something's")
+        }
+    }
+
+    pub fn thes_<T>(self, obj: &T) -> Self
+    where
+        T: Object,
+    {
+        if self.o.is_me(obj) {
+            self.s("your")
+        } else if self.o.can_see(obj) {
+            if let Some(ch) = obj.long_name().chars().rev().next() {
+                let uc = ch.is_uppercase();
+                let add = match ch {
+                    's' | 'S' => "'",
+                    _ => {
+                        if uc {
+                            "'S"
+                        } else {
+                            "'s"
+                        }
+                    }
+                };
+                let mut s2 = self.the_(obj);
+                s2.add_space = false;
+                s2.s(add)
+            } else {
+                self
+            }
+        } else if obj.is_short_proper() {
+            self.s("someone's")
+        } else {
+            self.s("something's")
+        }
+    }
+
+    pub fn thess<T>(self, _who: &T) -> Self
     where
         T: Object,
     {
         unimplemented!();
     }
 
-    pub fn thes_<T>(self, who: &T) -> Self
-    where
-        T: Object,
-    {
-        unimplemented!();
-    }
-
-    pub fn thess<T>(self, who: &T) -> Self
-    where
-        T: Object,
-    {
-        unimplemented!();
-    }
-
-    pub fn thess_<T>(self, who: &T) -> Self
+    pub fn thess_<T>(self, _who: &T) -> Self
     where
         T: Object,
     {
