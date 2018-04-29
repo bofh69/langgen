@@ -4,7 +4,7 @@ pub struct Suffix<T> {
 
 impl<T: Clone> Suffix<T> {
     pub fn new(data: Vec<(String, T)>) -> Suffix<T> {
-        Suffix { data: data }
+        Suffix { data }
     }
 
     pub fn lookup(&self, what: &str) -> Option<(&str, T)> {

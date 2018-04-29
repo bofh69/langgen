@@ -3,8 +3,6 @@ mod suffix;
 /*
  * TODO: someone/something should be decided depending on if it is a
  *       thing or not.
- * TODO: thes (the wand's/your), thes_ (the long wand's/your),
- * TODO: thess (the long wand's/yours),
  * TODO: word/word_ (long wand)
  * TODO: plural/plural_ (the long wands)
  * TODO: he
@@ -14,7 +12,6 @@ mod suffix;
  * TODO: himself
  * TODO: snum - number as string
  * TODO: num - 1st, 2nd, 3rd, 4th ...
- * TODO: Named::gender should perhaps be moved to Object
  * TODO: Aliases on Named & NamedFactory: Gandalf, Gandalf the gray, %man, %gray
  */
 
@@ -124,8 +121,7 @@ fn needs_dot(s: &str) -> bool {
 // Used to decide between a/an.
 fn is_vowel(c: char) -> bool {
     match c {
-        'a' | 'e' | 'i' | 'o' | 'u' |
-        'A' | 'E' | 'I' | 'O' | 'U' => true,
+        'a' | 'e' | 'i' | 'o' | 'u' | 'A' | 'E' | 'I' | 'O' | 'U' => true,
         // y is usually not pronounced like a vowel.
         _ => false,
     }
@@ -266,12 +262,12 @@ impl NamedFactory {
             names[3].remove(0);
         }
         Box::new(NamedImpl {
-            names: names,
-            short_proper_name: short_proper_name,
-            long_proper_name: long_proper_name,
-            short_proper_plural_name: short_proper_plural_name,
-            long_proper_plural_name: long_proper_plural_name,
-            gender: gender,
+            names,
+            short_proper_name,
+            long_proper_name,
+            short_proper_plural_name,
+            long_proper_plural_name,
+            gender,
             thing: is_thing,
         }) as Box<Named>
     }
@@ -381,7 +377,7 @@ impl<'a> OutputBuilder<'a> {
     /// the text to Output.
     pub fn new(o: &'a mut Output) -> OutputBuilder<'a> {
         OutputBuilder {
-            o: o,
+            o,
             s: String::new(),
             cap_it: true,
             add_space: false,
@@ -425,9 +421,8 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    fn add_s(str: &mut String)
-    {
-        let mut add : &str = "";
+    fn add_s(str: &mut String) {
+        let mut add: &str = "";
         let mut uc = false;
         let mut remove = 0;
 
@@ -438,8 +433,7 @@ impl<'a> OutputBuilder<'a> {
                     uc = true;
                 }
                 add = match ch {
-                    's' | 'o' | 'z' | 'x' |
-                    'S' | 'O' | 'Z' | 'X' => "es",
+                    's' | 'o' | 'z' | 'x' | 'S' | 'O' | 'Z' | 'X' => "es",
                     'y' | 'Y' => {
                         remove = 1;
                         if let Some(c2) = ci.next() {
@@ -455,8 +449,7 @@ impl<'a> OutputBuilder<'a> {
                     }
                     'h' | 'H' => {
                         if let Some(c2) = ci.next() {
-                            if c2 == 'c' || c2 == 's' ||
-                               c2 == 'C' || c2 == 'S' {
+                            if c2 == 'c' || c2 == 's' || c2 == 'C' || c2 == 'S' {
                                 "es"
                             } else {
                                 "s"
@@ -650,6 +643,27 @@ impl<'a> OutputBuilder<'a> {
     }
 
     pub fn thes<T>(self, who: &T) -> Self
+    where
+        T: Object,
+    {
+        unimplemented!();
+    }
+
+    pub fn thes_<T>(self, who: &T) -> Self
+    where
+        T: Object,
+    {
+        unimplemented!();
+    }
+
+    pub fn thess<T>(self, who: &T) -> Self
+    where
+        T: Object,
+    {
+        unimplemented!();
+    }
+
+    pub fn thess_<T>(self, who: &T) -> Self
     where
         T: Object,
     {
