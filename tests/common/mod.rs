@@ -110,7 +110,7 @@ pub struct DebugOutput {
     pub me: bool,
 }
 
-impl ::Viewer for DebugOutput {
+impl crate::Viewer for DebugOutput {
     fn can_see(&self, _who: &Object) -> bool {
         self.can_see
     }

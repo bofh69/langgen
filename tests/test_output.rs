@@ -2,7 +2,7 @@ extern crate langgen;
 
 mod common;
 
-use common::*;
+use crate::common::*;
 use langgen::*;
 
 #[test]
