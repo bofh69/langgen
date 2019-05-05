@@ -70,7 +70,7 @@ pub trait Object: Named {}
  */
 pub trait Output: Viewer {
     fn write_text(&mut self, text: &str);
-    fn write_style(&mut self, _: &str);
+    fn write_style(&mut self, style: &str);
     fn done(&mut self);
     fn out(&mut self) -> OutputBuilder;
 }
