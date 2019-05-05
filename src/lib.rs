@@ -723,6 +723,7 @@ impl<'a> OutputBuilder<'a> {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 mod tests {
     use super::*;
 

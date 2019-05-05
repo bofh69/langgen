@@ -7,6 +7,7 @@ pub struct DebugObject {
     pub me: bool,
 }
 
+#[allow(dead_code)]
 impl DebugObject {
     pub fn new(name: &str, sex: Gender, thing: bool) -> DebugObject {
         let mut buff = std::io::Cursor::new("man:men\n");
@@ -103,6 +104,7 @@ impl Named for DebugObject {
     }
 }
 
+#[allow(dead_code)]
 pub struct DebugOutput {
     pub text: String,
     pub last_text: String,
@@ -152,6 +154,7 @@ impl Output for DebugOutput {
     }
 }
 
+#[allow(dead_code)]
 impl DebugOutput {
     pub fn new() -> DebugOutput {
         DebugOutput {
