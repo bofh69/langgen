@@ -10,8 +10,10 @@ pub struct DebugObject {
 #[allow(dead_code)]
 impl DebugObject {
     pub fn new(name: &str, sex: Gender, thing: bool) -> DebugObject {
+        use crate::named::Factory;
+
         let mut buff = std::io::Cursor::new("man:men\n");
-        let nf = NamedFactory::from_reader(&mut buff).unwrap();
+        let nf = Factory::from_reader(&mut buff).unwrap();
         DebugObject {
             named: nf.create(name, sex, thing),
             me: false,

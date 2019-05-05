@@ -1,4 +1,3 @@
-* Move NamedImpl & NamedFactory to their own crate or namespace
 * Aliases on Named & NamedFactory: Gandalf, Gandalf the gray, %man, %gray
 * someone/something should be decided depending on if it is a thing or not.
 
