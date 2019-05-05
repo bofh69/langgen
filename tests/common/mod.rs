@@ -11,7 +11,7 @@ pub struct DebugObject {
 impl DebugObject {
     pub fn new(name: &str, sex: Gender, thing: bool) -> DebugObject {
         let mut buff = std::io::Cursor::new("man:men\n");
-        let nf = NamedFactory::new(&mut buff);
+        let nf = NamedFactory::from_reader(&mut buff).unwrap();
         DebugObject {
             named: nf.create(name, sex, thing),
             me: false,

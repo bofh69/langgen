@@ -1,9 +1,13 @@
 mod suffix;
 
 /*
+ * TODO: Move NamedImpl & NamedFactory to their own crate or namespace
+ * TODO: Aliases on Named & NamedFactory: Gandalf, Gandalf the gray, %man, %gray
+ *
  * TODO: someone/something should be decided depending on if it is a
  *       thing or not.
  * TODO: word/word_ (long wand)
+ * TODO: Word/Word_ (long wand)
  * TODO: plural/plural_ (the long wands)
  * TODO: he
  * TODO: he_s
@@ -12,7 +16,6 @@ mod suffix;
  * TODO: himself
  * TODO: snum - number as string
  * TODO: num - 1st, 2nd, 3rd, 4th ...
- * TODO: Aliases on Named & NamedFactory: Gandalf, Gandalf the gray, %man, %gray
  */
 
 /// The gender of Named:s.
@@ -153,7 +156,7 @@ struct NamedImpl {
 }
 
 impl NamedFactory {
-    pub fn new(buff: &mut std::io::BufRead) -> NamedFactory {
+    pub fn from_reader(buff: &mut std::io::BufRead) -> Result<Self, String> {
         fn is_comment(line: &str) -> bool {
             let line = line.trim();
             if let Some(c) = line.chars().next() {
@@ -174,20 +177,20 @@ impl NamedFactory {
             if !line.trim().is_empty() && !is_comment(&line) {
                 let s = line.split(':').map(String::from).collect::<Vec<String>>();
                 if s.len() != 2 {
-                    panic!(
+                    return Err(format!(
                         "Pluralized mapping has the wrong format on line {}, should be \
                          from:to: {:?}",
                         nr, s
-                    );
+                    ));
                 }
                 map.push((String::from(s[0].trim()), String::from(s[1].trim())));
             }
             line.clear();
         }
 
-        NamedFactory {
+        Ok(Self {
             pluralising_suffixes: suffix::Suffix::new(map),
-        }
+        })
     }
 
     fn pluralize(&self, name: &str) -> String {
@@ -735,7 +738,7 @@ mod tests {
     impl DebugObject {
         pub fn new(name: &str, sex: Gender, thing: bool) -> DebugObject {
             let mut buff = std::io::Cursor::new("man:men\n");
-            let nf = NamedFactory::new(&mut buff);
+            let nf = NamedFactory::from_reader(&mut buff).unwrap();
             DebugObject {
                 named: nf.create(name, sex, thing),
                 me: false,
@@ -807,7 +810,7 @@ mod tests {
 
     fn get_named_fac() -> NamedFactory {
         let mut pluralizer = std::io::Cursor::new("man:men\nfe:ves\n");
-        NamedFactory::new(&mut pluralizer)
+        NamedFactory::from_reader(&mut pluralizer).unwrap()
     }
 
     #[test]
