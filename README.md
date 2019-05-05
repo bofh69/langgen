@@ -15,9 +15,9 @@ This crate was inspired by DUMII, a MUD originally written by Christer Holgersso
 This crate has both an API and a template system for generating strings.
 The API can be used like this:
 ```
-output.out().the(me).v_e("give").\a_(obj).s("to").the_(env);
+output.out().The(me).v_e("give").\a_(obj).s("to").the_(env);
 ```
-Traits are used to make this usable with existing code.
+Traits are used to make this easy to integrate with existing code.
 
 
 Strings like this:
@@ -26,7 +26,7 @@ Strings like this:
 ```
 is used to generate messages like:
 * The elf gives a stamp to Gandalf the gray.
-* You give a stamp to the old elf.
+* You give an apple to the old elf.
 * The small goblin gives a stamp to someone.
 * Someone gives something to the green rabbits
 
@@ -35,14 +35,14 @@ There are a few concepts involved.
 
 ### Named Objects
 A named object is an object with four names and some flags;
-* A singular short name (ie postman)
-* A singular long name (ie old postman)
-* A plural short name  (ie postmen)
-* A plural long name (ie old postmen)
+* A singular short name (postman)
+* A singular long name (old postman)
+* A plural short name  (postmen)
+* A plural long name (old postmen)
 The names can be nouns and proper names.
 
 ### Viewers
-A viewer can answer questions such as if it can see an Object.
+A viewer is something that can observe and interact with objects.
 
 ### Objects
 An Object is a Named Object and also a Viewer.
@@ -52,42 +52,42 @@ A template text is a string like this:
 ```
 \The(me) give\s(me) \a(env) to \the(obj).
 ```
-"me", "env" and "obj" are refering to actors.
+"me", "env" and "obj" are refering to Objects.
 "\The", "\s" and "\a" (among others) are codes that are transformed into
-proper English for the refered actors.
+proper English for the refered Objects.
 
 ### Output Handlers
 An output handler is a Viewer and it has methods to send
-the generated texts to the users.
+the generated texts to the user/users.
 
 ### Templates
 A template is a collection of template texts and some description about
 who should see each template text:
 ```
 # Comments can be written here.
-can_see_curses(me)
+can_see_curses(viewer), can_see_curses(me)
 \The(me) shiver\s(me) as \he(me) see\s(me) \the__(obj) cursed \word(obj).
+*
+can_see_curses(me)
+\The(me) shiver\s(me) as \he(me) see\s(me) \the(obj).
 *
 all
 \The(me) look\s(me) at \the(obj).
 ```
 The template object can take an output handler and a context refering to
-the actors and render the context
-
-An output handler, a context that points out the actors and a template
-is used to generate the texts to the user.
+the objects and render the context with the template.
 
 ## Features
-* A named object can be created from a string like this:
+* A NamedFactory can create Named objects from a string like this:
   * "!Gandalf, !Gandalf the gray"
   * "orc, old orc"  
   * "louce, blue louce, lice, blue lice"
 * Configurable rules to create irregular plural names from singular names:
-  * "\*f" -> "\*ves" (ie elf becomes elves).
-  * "\*fe" -> "\*ves" (ie knife becomes knives).
-  * "\*man" -> "\*men" (ie woman, women).
+  * "\*f" -> "\*ves" (for making elf become elves).
+  * "\*fe" -> "\*ves" (for making knife become knives).
+  * "\*man" -> "\*men" (for making woman become women).
 * There is a macro system to make it easy to add styling:
-  * "\The(me) say\s(me) ''\text{Hello}\``" can first be transformed into:
+  * "\The(me) say\s(me) \quot{Hello}" will first be transformed into:
     "\The(me) say\s(me) ''\style(bold)Hello\style()\``" before it is used.
 
 ## Details
@@ -97,8 +97,10 @@ CODE     DESCRIPTION         RESULT                                      NO_THE
 ====     ===========         ======                                      ======
 \the()   the-long            the beautiful wand(s)                       Hansoh the Dwarf/you
 \the_()  the-short           the wand(s)                                 Hansoh/you
+\the__() the                 the/<nothing>
 \The()   The-long            The beautiful wand(s)                       Hansoh the Dwarf/You
 \The_()  The-short           The wand(s)                                 Hansoh/You
+\The__() The                 The/<nothing>
 \thes()  the-Long            the beautiful wand's (wands')               Hansoh the Dwarf's/your
 \the_s() the-Short           the wand's (wands')                         Hansoh's/your
 \the_ss() the-Short          the wand's (wands')                         Hansoh's/yours
@@ -106,15 +108,18 @@ CODE     DESCRIPTION         RESULT                                      NO_THE
 \The_s() The-Short           The wand's (wands')                         Hansoh's/Your
 \a()     a-long              a/an/some beautiful wand(s)                 Hansoh the Dwarf/you
 \a_()    a-short             a/an/some wand(s)                           Hansoh the Dwarf/you
+\a__()   a                   a/an/<nothing>
 \A()     A-long              A/An/Some beautiful wand(s)                 Hansoh the Dwarf/You
 \A_(     A-short             A/An/Some wand(s)                           Hansoh the Dwarf/You
+\A__()   A                   A/An/<nothing>
 \my()    possessive-long     your/his/her/its/their beautiful wand(s)    Hansoh the Dwarf/you
 \my_()   possessive-short    your/his/her/its/their wand(s)              Hansoh/you
 \word()  word-long           beautiful wand(s)                           Hansoh the Dwarf/you
 \word_() word-short          wand(s)                                     Hansoh/you
+\Word()  Word-long           Beautiful wand(s)                           Hansoh/You
 \Word_() Word-short          Wand(s)                                     Hansoh/You
 \STR()   string              <the argument to STR()>
-\s()     verb-end            <nothing>/s/es
+\s()     verb-ending         <nothing>/s/es
 \is()    is/are              " is "/" are "
 \style(style) Adds style. It is up to the output system to make sense of it.
 
