@@ -95,31 +95,24 @@ the objects and render the context with the template.
 ```
 CODE     DESCRIPTION         RESULT                                      NO_THE
 ====     ===========         ======                                      ======
-\the()   the-long            the beautiful wand(s)                       Hansoh the Dwarf/you
-\the_()  the-short           the wand(s)                                 Hansoh/you
+\the_()  the-long            the beautiful wand(s)                       Hansoh the Dwarf/you
+\the()   the-short           the wand(s)                                 Hansoh/you
 \the__() the                 the/<nothing>
-\The()   The-long            The beautiful wand(s)                       Hansoh the Dwarf/You
-\The_()  The-short           The wand(s)                                 Hansoh/You
-\The__() The                 The/<nothing>
-\thes()  the-Long            the beautiful wand's (wands')               Hansoh the Dwarf's/your
-\the_s() the-Short           the wand's (wands')                         Hansoh's/your
-\the_ss() the-Short          the wand's (wands')                         Hansoh's/yours
-\Thes()  The-Long            The beautiful wand's (wands')               Hansoh the Dwarf's/Your
-\The_s() The-Short           The wand's (wands')                         Hansoh's/Your
-\a()     a-long              a/an/some beautiful wand(s)                 Hansoh the Dwarf/you
-\a_()    a-short             a/an/some wand(s)                           Hansoh the Dwarf/you
+\thes_() the-Long            the beautiful wand's (wands')               Hansoh the Dwarf's/your
+\thes()  the-Short           the wand's (wands')                         Hansoh's/your
+\thess_() the-Long           the beautiful wand's (wands')               Hansoh the Dwarf's/yours
+\thess() the-Short           the wand's (wands')                         Hansoh's/yours
+\a_()    a-long              a/an/some beautiful wand(s)                 Hansoh the Dwarf/you
+\a()     a-short             a/an/some wand(s)                           Hansoh the Dwarf/you
 \a__()   a                   a/an/<nothing>
-\A()     A-long              A/An/Some beautiful wand(s)                 Hansoh the Dwarf/You
-\A_(     A-short             A/An/Some wand(s)                           Hansoh the Dwarf/You
-\A__()   A                   A/An/<nothing>
-\my()    possessive-long     your/his/her/its/their beautiful wand(s)    Hansoh the Dwarf/you
-\my_()   possessive-short    your/his/her/its/their wand(s)              Hansoh/you
-\word()  word-long           beautiful wand(s)                           Hansoh the Dwarf/you
-\word_() word-short          wand(s)                                     Hansoh/you
-\Word()  Word-long           Beautiful wand(s)                           Hansoh/You
-\Word_() Word-short          Wand(s)                                     Hansoh/You
-\STR()   string              <the argument to STR()>
-\s()     verb-ending         <nothing>/s/es
+\my_()   possessive-long     your/his/her/its/their beautiful wand(s)    Hansoh the Dwarf/you
+\my()    possessive-short    your/his/her/its/their wand(s)              Hansoh/you
+\word_() word-long           beautiful wand(s)                           Hansoh the Dwarf/you
+\word()  word-short          wand(s)                                     Hansoh/you
+\plural_() pl.word-long      beautiful wands                             Hell's Dwarves/you
+\plural()  pl.word-short     wands                                       Borg/you
+\s()     string              <the argument to s()>
+\v_e()   verb-ending         <nothing>/s/es
 \is()    is/are              " is "/" are "
 \style(style) Adds style. It is up to the output system to make sense of it.
 
@@ -128,13 +121,13 @@ CODE     DESCRIPTION         RESULT                                      NO_THE
 \snum(num) string from num   nine
 \str(text) string from text  A string
 
+The leading case of the code determines the case of the word.
+
 
 CODE             MALE    FEMALE  NEUTER  PLURAL      YOU         SOMETHING   SOMEONE
 ====             ====    ======  ======  ======      ===         =========   =======
 \he()            he      she     it      they        you         it          he
-\He()            He      She     It      They        You         It          He
 \he_s()          he's    she's   it's    they're     you're      it's        he's
-\He_s()          He's    She's   It's    They're     You're      It's        He's
 \his()           his     her     its     their       your        its         his
 \hiss()          his     hers    its     theirs      yours       its         his
 \him()           him     her     it      them        you         it          him
