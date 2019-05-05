@@ -216,7 +216,7 @@ impl NamedFactory {
     pub fn create(&self, name: &str, gender: Gender, is_thing: bool) -> Box<Named> {
         let mut names: Vec<String> = name
             .split(',')
-            .map(|s| String::from(s.trim_left()))
+            .map(|s| String::from(s.trim_start()))
             .collect();
         if names.len() < 2 {
             let long_name = names[0].clone();
