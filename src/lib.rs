@@ -48,7 +48,7 @@ pub trait Viewer {
     fn is_me(&self, who: &Object) -> bool;
 }
 
-/// An Object is an object or Subject in templates.
+/// An Object is an object or subject in templates.
 pub trait Object: Named {}
 
 /**
@@ -260,9 +260,9 @@ impl<'a> OutputBuilder<'a> {
     where
         T: Object,
     {
-        // This is never first in a sentance, so no need to
-        // capitalize it.
-        assert!(!self.cap_it);
+        if self.cap_it {
+            unimplemented!();
+        }
         if self.add_space {
             self.s.push(' ');
         }
@@ -275,7 +275,7 @@ impl<'a> OutputBuilder<'a> {
         self.s("")
     }
 
-    fn the__<T>(mut self, obj: &T, name: &str, is_proper: bool) -> Self
+    fn add_the_word<T>(mut self, obj: &T, name: &str, is_proper: bool) -> Self
     where
         T: Object,
     {
@@ -297,17 +297,17 @@ impl<'a> OutputBuilder<'a> {
     /// If the viewer can't see it, someone/something is sent instead.
     /// The text is capitalized as needed.
     pub fn the<T: Object>(self, obj: &T) -> Self {
-        self.the__(obj, obj.short_name(), obj.is_short_proper())
+        self.add_the_word(obj, obj.short_name(), obj.is_short_proper())
     }
 
     /// Sends "the object-long-name" to Output.
     /// If the viewer can't see it, someone/something is sent instead.
     /// The text is capitalized as needed.
     pub fn the_<T: Object>(self, obj: &T) -> Self {
-        self.the__(obj, obj.long_name(), obj.is_long_proper())
+        self.add_the_word(obj, obj.long_name(), obj.is_long_proper())
     }
 
-    fn a__<T>(mut self, obj: &T, name: &str, is_prop: bool) -> Self
+    fn add_a_word<T>(mut self, obj: &T, name: &str, is_prop: bool) -> Self
     where
         T: Object,
     {
@@ -341,14 +341,14 @@ impl<'a> OutputBuilder<'a> {
     /// If the viewer can't see it, someone/something is sent instead.
     /// The text is capitalized as needed.
     pub fn a<T: Object>(self, obj: &T) -> Self {
-        self.a__(obj, obj.short_name(), obj.is_short_proper())
+        self.add_a_word(obj, obj.short_name(), obj.is_short_proper())
     }
 
     /// Sends "a/an object-long-name" to Output.
     /// If the viewer can't see it, someone/something is sent instead.
     /// The text is capitalized as needed.
     pub fn a_<T: Object>(self, obj: &T) -> Self {
-        self.a__(obj, obj.long_name(), obj.is_long_proper())
+        self.add_a_word(obj, obj.long_name(), obj.is_long_proper())
     }
 
     pub fn my<TW, TO>(mut self, who: &TW, obj: &TO) -> Self
