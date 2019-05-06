@@ -362,3 +362,11 @@ fn test_thes_() {
     out.out().thes_(&adam);
     assert_eq!(out.last_text, "Your.");
 }
+
+#[test]
+fn test_suppress_dot() {
+    let mut out = DebugOutput::new();
+
+    out.out().s("hello").suppress_dot();
+    assert_eq!(out.last_text, "Hello");
+}

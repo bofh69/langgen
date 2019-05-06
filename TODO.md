@@ -1,7 +1,6 @@
 * Aliases on Named & NamedFactory: Gandalf, Gandalf the gray, %man, %gray
 * someone/something should be decided depending on if it is a thing or not.
 
-* supress_dot
 * word/word_ (long wand)
 * plural/plural_ (the long wands)
 * thess

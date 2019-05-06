@@ -140,13 +140,14 @@ pub struct OutputBuilder<'a> {
     s: String,
     cap_it: bool,
     add_space: bool,
+    suppress_dot: bool,
 }
 
 /// Calles `Output::done()`.
 impl<'a> Drop for OutputBuilder<'a> {
     fn drop(&mut self) {
         self.o.write_text(&self.s);
-        if needs_dot(&self.s) {
+        if !self.suppress_dot && needs_dot(&self.s) {
             self.o.write_text(".");
         }
         self.o.done();
@@ -162,6 +163,7 @@ impl<'a> OutputBuilder<'a> {
             s: String::new(),
             cap_it: true,
             add_space: false,
+            suppress_dot: false,
         }
     }
 
@@ -543,12 +545,10 @@ impl<'a> OutputBuilder<'a> {
         unimplemented!();
     }
 
-    /// The sentance will not have a dot added.
-    pub fn supress_dot<T>(self) -> Self
-    where
-        T: Object,
-    {
-        unimplemented!();
+    /// The sentance will not have a dot added automatically.
+    pub fn suppress_dot(mut self) -> Self {
+        self.suppress_dot = true;
+        self
     }
 }
 

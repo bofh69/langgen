@@ -28,7 +28,7 @@ pub trait Template {
     fn render(&self, ctx: &Context, out: &Output);
 }
 
-    /*
+/*
 #[cfg(test)]
 mod tests {
 
