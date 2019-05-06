@@ -351,6 +351,9 @@ impl<'a> OutputBuilder<'a> {
         self.add_a_word(obj, obj.long_name(), obj.is_long_proper())
     }
 
+    /// Sends "my/his/her/their/its object-short-name" to Output.
+    /// If the viewer can't see it, a() is used instead.
+    /// The text is capitalized as needed.
     pub fn my<TW, TO>(mut self, who: &TW, obj: &TO) -> Self
     where
         TW: Object,
@@ -372,6 +375,9 @@ impl<'a> OutputBuilder<'a> {
         self
     }
 
+    /// Sends "my/his/her/their/its object-long-name" to Output.
+    /// If the viewer can't see it, a() is used instead.
+    /// The text is capitalized as needed.
     pub fn my_<TW, TO>(mut self, who: &TW, obj: &TO) -> Self
     where
         TW: Object,
@@ -393,7 +399,7 @@ impl<'a> OutputBuilder<'a> {
         self
     }
 
-    pub fn sing_plur<T>(self, who: &T, singular: &str, plural: &str) -> Self
+    fn sing_plur<T>(self, who: &T, singular: &str, plural: &str) -> Self
     where
         T: Object,
     {
@@ -409,6 +415,8 @@ impl<'a> OutputBuilder<'a> {
         })
     }
 
+    /// Sends "is"/"are" to Output.
+    /// The text is capitalized as needed.
     pub fn is<T>(self, who: &T) -> Self
     where
         T: Object,
@@ -416,6 +424,8 @@ impl<'a> OutputBuilder<'a> {
         self.sing_plur(who, "is", "are")
     }
 
+    /// Sends "has"/"have" to Output.
+    /// The text is capitalized as needed.
     pub fn has<T>(self, who: &T) -> Self
     where
         T: Object,
@@ -423,6 +433,9 @@ impl<'a> OutputBuilder<'a> {
         self.sing_plur(who, "has", "have")
     }
 
+    /// Sends "the <object-short-name>'s" to Output.
+    /// If the viewer can't see it, "something's"/"someone's" is used.
+    /// The text is capitalized as needed.
     pub fn thes<T>(self, obj: &T) -> Self
     where
         T: Object,
@@ -455,6 +468,9 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
+    /// Sends "your"/"the <object-long-name>'s" to Output.
+    /// If the viewer can't see it, "something's"/"someone's" is used.
+    /// The text is capitalized as needed.
     pub fn thes_<T>(self, obj: &T) -> Self
     where
         T: Object,
@@ -487,6 +503,9 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
+    /// Sends "yours"/"the <object-short-name>'s" to Output.
+    /// If the viewer can't see it, "something's"/"someone's" is used.
+    /// The text is capitalized as needed.
     pub fn thess<T>(self, _who: &T) -> Self
     where
         T: Object,
@@ -494,7 +513,38 @@ impl<'a> OutputBuilder<'a> {
         unimplemented!();
     }
 
+    /// Sends "yours"/"the <object-long-name>'s" to Output.
+    /// If the viewer can't see it, "something's"/"someone's" is used.
+    /// The text is capitalized as needed.
     pub fn thess_<T>(self, _who: &T) -> Self
+    where
+        T: Object,
+    {
+        unimplemented!();
+    }
+
+    /// Sends "you"/<objects-short-name> to Output.
+    /// If the viewer can't see it, "something's"/"someone's" is used.
+    /// The text is capitalized as needed.
+    pub fn word<T>(self, _who: &T) -> Self
+    where
+        T: Object,
+    {
+        unimplemented!();
+    }
+
+    /// Sends "you"/<objects-long-name> to Output.
+    /// If the viewer can't see it, "something's"/"someone's" is used.
+    /// The text is capitalized as needed.
+    pub fn word_<T>(self, _who: &T) -> Self
+    where
+        T: Object,
+    {
+        unimplemented!();
+    }
+
+    /// The sentance will not have a dot added.
+    pub fn supress_dot<T>(self) -> Self
     where
         T: Object,
     {
