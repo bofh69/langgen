@@ -157,8 +157,8 @@ impl<'a> Drop for OutputBuilder<'a> {
 impl<'a> OutputBuilder<'a> {
     /// Creates a new OutputBuilder that will output
     /// the text to Output.
-    pub fn new(o: &'a mut Output) -> OutputBuilder<'a> {
-        OutputBuilder {
+    pub fn new(o: &'a mut Output) -> Self {
+        Self {
             o,
             s: String::new(),
             cap_it: true,
@@ -295,20 +295,6 @@ impl<'a> OutputBuilder<'a> {
         }
     }
 
-    /// Sends "the object-short-name" to Output.
-    /// If the viewer can't see it, someone/something is sent instead.
-    /// The text is capitalized as needed.
-    pub fn the<T: Object>(self, obj: &T) -> Self {
-        self.add_the_word(obj, obj.short_name(), obj.is_short_proper())
-    }
-
-    /// Sends "the object-long-name" to Output.
-    /// If the viewer can't see it, someone/something is sent instead.
-    /// The text is capitalized as needed.
-    pub fn the_<T: Object>(self, obj: &T) -> Self {
-        self.add_the_word(obj, obj.long_name(), obj.is_long_proper())
-    }
-
     fn add_a_word<T>(mut self, obj: &T, name: &str, is_prop: bool) -> Self
     where
         T: Object,
@@ -337,6 +323,20 @@ impl<'a> OutputBuilder<'a> {
         } else {
             self.s("something")
         }
+    }
+
+    /// Sends "the object-short-name" to Output.
+    /// If the viewer can't see it, someone/something is sent instead.
+    /// The text is capitalized as needed.
+    pub fn the<T: Object>(self, obj: &T) -> Self {
+        self.add_the_word(obj, obj.short_name(), obj.is_short_proper())
+    }
+
+    /// Sends "the object-long-name" to Output.
+    /// If the viewer can't see it, someone/something is sent instead.
+    /// The text is capitalized as needed.
+    pub fn the_<T: Object>(self, obj: &T) -> Self {
+        self.add_the_word(obj, obj.long_name(), obj.is_long_proper())
     }
 
     /// Sends "a/an object-short-name" to Output.
@@ -557,84 +557,6 @@ impl<'a> OutputBuilder<'a> {
 mod tests {
     use super::*;
 
-    pub struct DebugObject {
-        named: Box<Named>,
-        me: bool,
-    }
-
-    impl DebugObject {
-        pub fn new(name: &str, sex: Gender, thing: bool) -> DebugObject {
-            let mut buff = std::io::Cursor::new("man:men\n");
-            let nf = named::Factory::from_reader(&mut buff).unwrap();
-            DebugObject {
-                named: nf.create(name, sex, thing),
-                me: false,
-            }
-        }
-    }
-
-    impl Object for DebugObject {}
-
-    impl Viewer for DebugObject {
-        fn can_see(&self, _who: &Object) -> bool {
-            true
-        }
-
-        fn can(&self, _verb: &str, _who: &Object) -> bool {
-            true
-        }
-
-        fn has(&self, _property: &str) -> bool {
-            true
-        }
-
-        fn is_me(&self, _: &Object) -> bool {
-            self.me
-        }
-    }
-
-    impl Named for DebugObject {
-        fn gender(&self) -> Gender {
-            self.named.gender()
-        }
-
-        fn is_thing(&self) -> bool {
-            self.named.is_thing()
-        }
-
-        fn is_short_proper(&self) -> bool {
-            self.named.is_short_proper()
-        }
-
-        fn short_name(&self) -> &str {
-            self.named.short_name()
-        }
-
-        fn is_long_proper(&self) -> bool {
-            self.named.is_long_proper()
-        }
-
-        fn long_name(&self) -> &str {
-            self.named.long_name()
-        }
-
-        fn is_short_plural_proper(&self) -> bool {
-            self.named.is_short_plural_proper()
-        }
-
-        fn short_plural_name(&self) -> &str {
-            self.named.short_plural_name()
-        }
-
-        fn is_long_plural_proper(&self) -> bool {
-            self.named.is_long_plural_proper()
-        }
-
-        fn long_plural_name(&self) -> &str {
-            self.named.long_plural_name()
-        }
-    }
-
     #[test]
     fn test_is_singular() {
         assert_eq!(OutputBuilder::is_singular(Gender::Plural), false);
@@ -657,7 +579,7 @@ mod tests {
 
     #[test]
     fn test_uppercase_first_char() {
-        for test in vec![
+        for test in &[
             ("nisse hult", "Nisse hult"),
             ("Nisse", "Nisse"),
             ("åsa", "Åsa"),
@@ -679,10 +601,10 @@ mod tests {
 
     #[test]
     fn test_needs_dot() {
-        for s in vec!["a", "nissa"] {
+        for s in &["a", "nissa"] {
             assert_eq!(needs_dot(s), true);
         }
-        for s in vec!["", "a.", "b!", "c?", "d:", "e;", "f\""] {
+        for s in &["", "a.", "b!", "c?", "d:", "e;", "f\""] {
             assert_eq!(needs_dot(s), false);
         }
     }
