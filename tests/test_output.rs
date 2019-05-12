@@ -16,12 +16,51 @@ fn test_debug_output() {
     assert_eq!(out.text, "");
 }
 
+fn assert_call<F>(f: F, result: &[&str; 6])
+where
+    F: for<'a> Fn((OutputBuilder<'a>, &DebugObject)) -> OutputBuilder<'a>,
+{
+    let mut out = DebugOutput::new();
+    let me = DebugObject::me();
+    out.me = true;
+    f((out.out(), &me));
+    assert_eq!(out.last_text, format!("{}.", result[0]));
+    out.me = false;
+
+    let objs = &[
+        me,
+        DebugObject::adam(),
+        DebugObject::apple(),
+        DebugObject::dust(),
+        DebugObject::apples(),
+    ];
+    for (o, res) in objs.iter().zip(result[1..].iter()) {
+        f((out.out(), o));
+        assert_eq!(out.last_text, format!("{}.", res));
+    }
+}
+
+#[test]
+fn test_out_a() {
+    assert_call(
+        |(ob, obj)| ob.a(obj),
+        &[
+            "You",
+            "An ItsMe",
+            "Adam",
+            "An apple",
+            "Some dust",
+            "Some apples",
+        ],
+    );
+}
+
 #[test]
 fn test_out_a_and_the() {
     let mut out = DebugOutput::new();
     let adam = DebugObject::adam();
     let apple = DebugObject::apple();
-    let water = DebugObject::water();
+    let dust = DebugObject::dust();
     let apples = DebugObject::apples();
 
     out.out().the(&adam).has(&adam).a(&apple);
@@ -32,12 +71,12 @@ fn test_out_a_and_the() {
     assert_eq!(out.last_text, "The green apple has Adam.");
     assert_eq!(out.text, "");
 
-    out.out().the(&water).s("is cold");
-    assert_eq!(out.last_text, "The water is cold.");
+    out.out().the(&dust).s("is cold");
+    assert_eq!(out.last_text, "The dust is cold.");
     assert_eq!(out.text, "");
 
-    out.out().a(&water);
-    assert_eq!(out.last_text, "Some water.");
+    out.out().a(&dust);
+    assert_eq!(out.last_text, "Some dust.");
     assert_eq!(out.text, "");
 
     out.out().a(&apples).s("and").a_(&apples);

@@ -4,7 +4,6 @@ use langgen::*;
 
 pub struct DebugObject {
     named: Box<Named>,
-    pub me: bool,
 }
 
 #[allow(dead_code)]
@@ -16,9 +15,13 @@ impl DebugObject {
         let nf = Factory::from_reader(&mut buff).unwrap();
         DebugObject {
             named: nf.create(name, sex, thing),
-            me: false,
         }
     }
+
+    pub fn me() -> Self {
+        DebugObject::new("ItsMe, It Is Me", Gender::Male, false)
+    }
+
     pub fn adam() -> Self {
         DebugObject::new("!Adam, !Adam Evasman", Gender::Male, false)
     }
@@ -39,30 +42,12 @@ impl DebugObject {
         DebugObject::new("knife, dull knife", Gender::Neuter, true)
     }
 
-    pub fn water() -> Self {
-        DebugObject::new("water, cold water", Gender::Uncountable, true)
+    pub fn dust() -> Self {
+        DebugObject::new("dust, gold dust", Gender::Uncountable, true)
     }
 }
 
 impl Object for DebugObject {}
-
-impl Viewer for DebugObject {
-    fn can_see(&self, _who: &Object) -> bool {
-        true
-    }
-
-    fn can(&self, _verb: &str, _who: &Object) -> bool {
-        true
-    }
-
-    fn has(&self, _property: &str) -> bool {
-        true
-    }
-
-    fn is_me(&self, _who: &Object) -> bool {
-        self.me
-    }
-}
 
 impl Named for DebugObject {
     fn gender(&self) -> Gender {
