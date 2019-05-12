@@ -24,15 +24,15 @@ mod test {
         let s = super::Suffix::new(vec![(String::from("abc"), 1)]);
         match s.lookup("abc") {
             Some((s, 1)) => assert_eq!(s, "abc"),
-            _ => assert!(false, "lookup did not find 'abc'"),
+            _ => panic!("lookup did not find 'abc'"),
         }
         match s.lookup("xabc") {
             Some((s, 1)) => assert_eq!(s, "abc"),
-            _ => assert!(false, "lookup did not find 'xabc'"),
+            _ => panic!("lookup did not find 'xabc'"),
         }
         match s.lookup("cba") {
             None => (),
-            _ => assert!(false, "lookup found 'abc'"),
+            _ => panic!("lookup found 'abc'"),
         }
     }
 }
