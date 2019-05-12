@@ -8,42 +8,42 @@ pub struct DebugObject {
 
 #[allow(dead_code)]
 impl DebugObject {
-    pub fn new(name: &str, sex: Gender, thing: bool) -> DebugObject {
+    pub fn new(name: &str, sex: Gender, thing: bool) -> Self {
         use crate::named::Factory;
 
         let mut buff = std::io::Cursor::new("man:men\n");
         let nf = Factory::from_reader(&mut buff).unwrap();
-        DebugObject {
+        Self {
             named: nf.create(name, sex, thing),
         }
     }
 
     pub fn me() -> Self {
-        DebugObject::new("ItsMe, It Is Me", Gender::Male, false)
+        Self::new("ItsMe, It Is Me", Gender::Male, false)
     }
 
     pub fn adam() -> Self {
-        DebugObject::new("!Adam, !Adam Evasman", Gender::Male, false)
+        Self::new("!Adam, !Adam Evasman", Gender::Male, false)
     }
 
     pub fn eva() -> Self {
-        DebugObject::new("!Eva, !Eva Adamsfru", Gender::Female, false)
+        Self::new("!Eva, !Eva Adamsfru", Gender::Female, false)
     }
 
     pub fn apple() -> Self {
-        DebugObject::new("apple, green apple", Gender::Neuter, true)
+        Self::new("apple, green apple", Gender::Neuter, true)
     }
 
     pub fn apples() -> Self {
-        DebugObject::new("apples, red apples", Gender::Plural, true)
+        Self::new("apples, red apples", Gender::Plural, true)
     }
 
     pub fn knife() -> Self {
-        DebugObject::new("knife, dull knife", Gender::Neuter, true)
+        Self::new("knife, dull knife", Gender::Neuter, true)
     }
 
     pub fn dust() -> Self {
-        DebugObject::new("dust, gold dust", Gender::Uncountable, true)
+        Self::new("dust, gold dust", Gender::Uncountable, true)
     }
 }
 
@@ -143,8 +143,8 @@ impl Output for DebugOutput {
 
 #[allow(dead_code)]
 impl DebugOutput {
-    pub fn new() -> DebugOutput {
-        DebugOutput {
+    pub fn new() -> Self {
+        Self {
             text: String::new(),
             last_text: String::new(),
             can_see: true,

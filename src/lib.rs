@@ -220,11 +220,11 @@ impl<'a> OutputBuilder<'a> {
                     'y' | 'Y' => {
                         remove = 1;
                         if let Some(c2) = ci.next() {
-                            if !is_vowel(c2) {
-                                "ies"
-                            } else {
+                            if is_vowel(c2) {
                                 remove = 0;
                                 "s"
+                            } else {
+                                "ies"
                             }
                         } else {
                             "ies"
@@ -582,9 +582,9 @@ mod tests {
         for test in &[
             ("nisse hult", "Nisse hult"),
             ("Nisse", "Nisse"),
-            ("åsa", "Åsa"),
+            ("\u{e5}sa", "\u{c5}sa"),
             ("\u{DF}-titanic", "SS-titanic"),
-            ("ñet", "Ñet"),
+            ("\u{f1}et", "\u{d1}et"),
         ] {
             let mut s = String::new();
             uppercase_first_char(test.0, &mut s);
