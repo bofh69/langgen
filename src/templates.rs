@@ -4,8 +4,8 @@ use crate::{Object, Output};
  * Objects are used in templates for obj, env etc.
  */
 pub enum ObjectRef<'a> {
-    Object(&'a Object),
-    CountedObject(i64, &'a Object),
+    Object(&'a dyn Object),
+    CountedObject(i64, &'a dyn Object),
     Int(i64),
     String(&'a str),
 }
@@ -25,7 +25,7 @@ pub trait Context {
  * Template contains the text's to generate a text.
  */
 pub trait Template {
-    fn render(&self, ctx: &Context, out: &Output);
+    fn render(&self, ctx: &dyn Context, out: &dyn Output);
 }
 
 /*

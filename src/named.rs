@@ -17,7 +17,7 @@ struct NamedImpl {
 }
 
 impl Factory {
-    pub fn from_reader(buff: &mut std::io::BufRead) -> Result<Self, String> {
+    pub fn from_reader(buff: &mut dyn std::io::BufRead) -> Result<Self, String> {
         fn is_comment(line: &str) -> bool {
             let line = line.trim();
             if let Some(c) = line.chars().next() {
@@ -77,7 +77,7 @@ impl Factory {
         ret
     }
 
-    pub fn create(&self, name: &str, gender: Gender, is_thing: bool) -> Box<Named> {
+    pub fn create(&self, name: &str, gender: Gender, is_thing: bool) -> Box<dyn Named> {
         let mut names: Vec<String> = name
             .split(',')
             .map(|s| String::from(s.trim_start()))
@@ -134,7 +134,7 @@ impl Factory {
             long_proper_plural_name,
             gender,
             thing: is_thing,
-        }) as Box<Named>
+        }) as Box<dyn Named>
     }
 }
 

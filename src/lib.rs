@@ -36,16 +36,16 @@ pub trait Named {
  */
 pub trait Viewer {
     /// Can this Viewer see who?
-    fn can_see(&self, who: &Object) -> bool;
+    fn can_see(&self, who: &dyn Object) -> bool;
 
     /// Can this Viewer "verb" who?
-    fn can(&self, verb: &str, who: &Object) -> bool;
+    fn can(&self, verb: &str, who: &dyn Object) -> bool;
 
     /// Does the Viewer have "property"?
     fn has(&self, property: &str) -> bool;
 
     /// Is who this viewer?
-    fn is_me(&self, who: &Object) -> bool;
+    fn is_me(&self, who: &dyn Object) -> bool;
 }
 
 /// An Object is an object or subject in templates.
@@ -108,18 +108,18 @@ impl Output for NullOutput {
     fn done(&mut self) {}
     /// Returns an OutputBuilder for self.
     fn out(&mut self) -> OutputBuilder {
-        OutputBuilder::new(self as &mut Output)
+        OutputBuilder::new(self as &mut dyn Output)
     }
 }
 
 impl Viewer for NullOutput {
     /// Always returns false.
-    fn can_see(&self, _: &Object) -> bool {
+    fn can_see(&self, _: &dyn Object) -> bool {
         false
     }
 
     /// Always returns false.
-    fn can(&self, _: &str, _: &Object) -> bool {
+    fn can(&self, _: &str, _: &dyn Object) -> bool {
         false
     }
 
@@ -129,14 +129,14 @@ impl Viewer for NullOutput {
     }
 
     /// Always returns false.
-    fn is_me(&self, _: &Object) -> bool {
+    fn is_me(&self, _: &dyn Object) -> bool {
         false
     }
 }
 
 /// `OutputBuilder` helps with the fluent interface for `Output::out()`
 pub struct OutputBuilder<'a> {
-    o: &'a mut Output,
+    o: &'a mut dyn Output,
     s: String,
     cap_it: bool,
     add_space: bool,
@@ -157,7 +157,7 @@ impl<'a> Drop for OutputBuilder<'a> {
 impl<'a> OutputBuilder<'a> {
     /// Creates a new OutputBuilder that will output
     /// the text to Output.
-    pub fn new(o: &'a mut Output) -> Self {
+    pub fn new(o: &'a mut dyn Output) -> Self {
         Self {
             o,
             s: String::new(),

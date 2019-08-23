@@ -3,7 +3,7 @@ extern crate std;
 use langgen::*;
 
 pub struct DebugObject {
-    named: Box<Named>,
+    named: Box<dyn Named>,
 }
 
 #[allow(dead_code)]
@@ -100,12 +100,12 @@ pub struct DebugOutput {
 }
 
 impl crate::Viewer for DebugOutput {
-    fn can_see(&self, _who: &Object) -> bool {
+    fn can_see(&self, _who: &dyn Object) -> bool {
         self.can_see
     }
 
     // Ie the viewer can "hear" Object.
-    fn can(&self, _verb: &str, _who: &Object) -> bool {
+    fn can(&self, _verb: &str, _who: &dyn Object) -> bool {
         true
     }
 
@@ -114,7 +114,7 @@ impl crate::Viewer for DebugOutput {
         true
     }
 
-    fn is_me(&self, _who: &Object) -> bool {
+    fn is_me(&self, _who: &dyn Object) -> bool {
         self.me
     }
 }
@@ -137,7 +137,7 @@ impl Output for DebugOutput {
     }
 
     fn out(&mut self) -> OutputBuilder {
-        OutputBuilder::new(self as &mut Output)
+        OutputBuilder::new(self as &mut dyn Output)
     }
 }
 
