@@ -16,7 +16,7 @@ fn test_debug_output() {
     assert_eq!(out.text, "");
 }
 
-fn assert_call<F>(f: F, result: &[&str; 6])
+fn assert_call<F>(f: F, result: &[&str; 12])
 where
     F: for<'a> Fn((OutputBuilder<'a>, &DebugObject)) -> OutputBuilder<'a>,
 {
@@ -36,7 +36,28 @@ where
     ];
     for (o, res) in objs.iter().zip(result[1..].iter()) {
         f((out.out(), o));
-        assert_eq!(out.last_text, format!("{}.", res));
+        assert_eq!(
+            out.last_text,
+            format!("{}.", res),
+            "{:?} should become {}",
+            o.short_name(),
+            res
+        );
+    }
+    out.can_see = false;
+    out.me = true;
+    f((out.out(), &DebugObject::me()));
+    assert_eq!(out.last_text, format!("{}.", result[6]));
+    out.me = false;
+    for (o, res) in objs.iter().zip(result[7..].iter()) {
+        f((out.out(), o));
+        assert_eq!(
+            out.last_text,
+            format!("{}.", res),
+            "{:?} should become {}",
+            o.short_name(),
+            res
+        );
     }
 }
 
@@ -46,11 +67,38 @@ fn test_out_a() {
         |(ob, obj)| ob.a(obj),
         &[
             "You",
-            "An ItsMe",
+            "ItsMe",
             "Adam",
             "An apple",
             "Some dust",
             "Some apples",
+            "You",
+            "Someone",
+            "Someone",
+            "Something",
+            "Something",
+            "Something",
+        ],
+    );
+}
+
+#[test]
+fn test_out_the() {
+    assert_call(
+        |(ob, obj)| ob.the(obj),
+        &[
+            "You",
+            "ItsMe",
+            "Adam",
+            "The apple",
+            "The dust",
+            "The apples",
+            "You",
+            "Someone",
+            "Someone",
+            "Something",
+            "Something",
+            "Something",
         ],
     );
 }

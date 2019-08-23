@@ -19,7 +19,7 @@ impl DebugObject {
     }
 
     pub fn me() -> Self {
-        Self::new("ItsMe, It Is Me", Gender::Male, false)
+        Self::new("!ItsMe, !It Is Me", Gender::Male, false)
     }
 
     pub fn adam() -> Self {
