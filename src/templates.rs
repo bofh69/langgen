@@ -14,11 +14,11 @@ pub enum ObjectRef<'a> {
  * Context contains the objects referenced in templates.
  */
 pub trait Context {
-    fn get_me(&self) -> ObjectRef; // The subject.
-    fn get_obj(&self) -> ObjectRef; // The object.
-    fn get_env(&self) -> ObjectRef; // Another object.
+    fn get_me(&self) -> ObjectRef<'_>; // The subject.
+    fn get_obj(&self) -> ObjectRef<'_>; // The object.
+    fn get_env(&self) -> ObjectRef<'_>; // Another object.
 
-    fn get(&self, who: &str) -> ObjectRef; // ie obj2, num, str
+    fn get(&self, who: &str) -> ObjectRef<'_>; // ie obj2, num, str
 }
 
 /**

@@ -59,7 +59,7 @@ pub trait Output: Viewer {
     fn write_text(&mut self, text: &str);
     fn write_style(&mut self, style: &str);
     fn done(&mut self);
-    fn out(&mut self) -> OutputBuilder;
+    fn out(&mut self) -> OutputBuilder<'_>;
 }
 
 fn last_char(s: &str) -> Option<char> {
@@ -107,7 +107,7 @@ impl Output for NullOutput {
     /// Does nothing.
     fn done(&mut self) {}
     /// Returns an OutputBuilder for self.
-    fn out(&mut self) -> OutputBuilder {
+    fn out(&mut self) -> OutputBuilder<'_> {
         OutputBuilder::new(self as &mut dyn Output)
     }
 }

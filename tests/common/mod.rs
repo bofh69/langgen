@@ -1,5 +1,5 @@
-extern crate langgen;
-extern crate std;
+use langgen;
+use std;
 use langgen::*;
 
 pub struct DebugObject {
@@ -136,7 +136,7 @@ impl Output for DebugOutput {
         self.text.clear();
     }
 
-    fn out(&mut self) -> OutputBuilder {
+    fn out(&mut self) -> OutputBuilder<'_> {
         OutputBuilder::new(self as &mut dyn Output)
     }
 }
